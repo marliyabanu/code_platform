@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problems - CodePlatform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+            transition: all 0.3s ease;
+        }
+
+        /* WHITE THEME (Default) */
+        body.white-theme {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #6c757d;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --accent: #3b82f6;
+            --accent-green: #10b981;
+            --navbar-bg: #ffffff;
+            background: #ffffff;
+            color: #1a1a2e;
+        }
+
+        /* BLACK THEME */
+        body.black-theme {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --card-bg: #111111;
+            --border: #2a2a2a;
+            --accent: #60a5fa;
+            --accent-green: #4ade80;
+            --navbar-bg: #111111;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        body.white-theme, body.black-theme {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .navbar {
+            background: var(--navbar-bg);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+
+        .stats-bar {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .problems-table {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 70px 1fr 100px 100px 100px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .problem-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 100px 100px 100px;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+            align-items: center;
+        }
+
+        .problem-row:hover {
+            background: var(--bg-secondary);
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .easy { background: #10b981; color: white; }
+        .medium { background: #f59e0b; color: white; }
+        .hard { background: #ef4444; color: white; }
+
+        .solved-text {
+            color: var(--accent-green);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .unsolved-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .solve-btn {
+            background: var(--accent);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .solve-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .table-header, .problem-row {
+                grid-template-columns: 50px 1fr 80px 80px 80px;
+                font-size: 0.7rem;
+                gap: 0.3rem;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+            .solve-btn {
+                padding: 4px 8px;
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body class="white-theme">
+    <nav class="navbar">
+        <div class="logo">⚡ CodePlatform</div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/problems" class="nav-link">Problems</a>
+            <a href="/leaderboard" class="nav-link">Leaderboard</a>
+            <a href="/progress" class="nav-link">Progress</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>📋 Coding Problems</h1>
+        
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-number">{{ problems|length }}</div>
+                <div class="stat-label">Total Problems</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ solved_ids|length }}</div>
+                <div class="stat-label">Solved</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ ((solved_ids|length / problems|length) * 100)|round|int }}%</div>
+                <div class="stat-label">Progress</div>
+            </div>
+        </div>
+
+        <div class="problems-table">
+            <div class="table-header">
+                <div>#</div>
+                <div>Title</div>
+                <div>Difficulty</div>
+                <div>Status</div>
+                <div>Action</div>
+            </div>
+            
+            <div id="problems-container">
+                {% for id, problem in problems.items() %}
+                <div class="problem-row">
+                    <div>{{ id }}</div>
+                    <div style="font-weight: 500;">{{ problem.title }}</div>
+                    <div>
+                        <span class="difficulty {{ problem.difficulty|lower }}">
+                            {{ problem.difficulty }}
+                        </span>
+                    </div>
+                    <div>
+                        {% if id in solved_ids %}
+                            <span class="solved-text">✅ Solved</span>
+                        {% else %}
+                            <span class="unsolved-text">⏳ Not Solved</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="/code?problem_id={{ id }}" class="solve-btn">
+                            {% if id in solved_ids %}Practice{% else %}Solve{% endif %}
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // THEME TOGGLE FUNCTION
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            
+            if (body.classList.contains('white-theme')) {
+                body.classList.remove('white-theme');
+                body.classList.add('black-theme');
+                btn.innerHTML = '☀️ Light Mode';
+                localStorage.setItem('theme', 'black');
+            } else {
+                body.classList.remove('black-theme');
+                body.classList.add('white-theme');
+                btn.innerHTML = '🌙 Dark Mode';
+                localStorage.setItem('theme', 'white');
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'black') {
+            document.body.classList.remove('white-theme');
+            document.body.classList.add('black-theme');
+            document.getElementById('themeToggle').innerHTML = '☀️ Light Mode';
+        } else {
+            document.body.classList.remove('black-theme');
+            document.body.classList.add('white-theme');
+            document.getElementById('themeToggle').innerHTML = '🌙 Dark Mode';
+        }
+    </script>
+</body>
+</html>

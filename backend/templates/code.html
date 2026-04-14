@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ problem.title }} - CodePlatform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Fira Code', monospace;
+            transition: all 0.3s ease;
+        }
+
+        /* WHITE THEME (Default) */
+        body {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #6c757d;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --accent: #3b82f6;
+            --accent-green: #10b981;
+            --editor-bg: #1e1e1e;
+            --editor-text: #d4d4d4;
+            --navbar-bg: #ffffff;
+            --output-bg: #1e1e1e;
+            background: #ffffff;
+            color: #1a1a2e;
+        }
+
+        /* BLACK THEME */
+        body.black-theme {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --card-bg: #111111;
+            --border: #2a2a2a;
+            --accent: #60a5fa;
+            --accent-green: #4ade80;
+            --editor-bg: #0d0d0d;
+            --editor-text: #4ade80;
+            --navbar-bg: #111111;
+            --output-bg: #0d0d0d;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        /* Apply variables */
+        body, body.black-theme {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .navbar {
+            background: var(--navbar-bg);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .problem-panel {
+            width: 45%;
+            background: var(--bg-primary);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+
+        .problem-content {
+            padding: 1.5rem;
+        }
+
+        .problem-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .problem-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .problem-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .difficulty {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .easy { background: #10b981; color: white; }
+        .medium { background: #f59e0b; color: white; }
+        .hard { background: #ef4444; color: white; }
+
+        .problem-id {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .problem-description p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .example-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .example-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .example-content {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .constraints-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .constraints-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .constraints-list li {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .editor-panel {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+        }
+
+        .editor-header {
+            background: var(--bg-primary);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .editor-area {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            background: var(--editor-bg);
+            color: var(--editor-text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            resize: none;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .run-btn, .submit-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .run-btn {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .submit-btn {
+            background: var(--accent);
+            color: white;
+        }
+
+        .output-section {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .output-content {
+            background: var(--output-bg);
+            color: var(--editor-text);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .problem-panel, .editor-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">⚡ CodePlatform</div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/problems" class="nav-link">Problems</a>
+            <a href="/leaderboard" class="nav-link">Leaderboard</a>
+            <a href="/progress" class="nav-link">Progress</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="problem-panel">
+            <div class="problem-content">
+                <div class="problem-header">
+                    <h1 class="problem-title">{{ problem.title }}</h1>
+                    <div class="problem-meta">
+                        <span class="difficulty {{ problem.difficulty|lower }}">{{ problem.difficulty }}</span>
+                        <span class="problem-id">#{{ problem.id }}</span>
+                    </div>
+                </div>
+
+                <div class="problem-description">
+                    <p>{{ problem.description }}</p>
+                </div>
+
+                <div class="examples-section">
+                    <div class="section-title">📌 Examples</div>
+                    
+                    {% if problem.id == 1 %}
+                    <div class="example-card">
+                        <div class="example-title">Example 1:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> nums = [2,7,11,15], target = 9<br>
+                            <strong>Output:</strong> [0,1]<br>
+                            <strong>Explanation:</strong> Because nums[0] + nums[1] = 2 + 7 = 9
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">Example 2:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> nums = [3,2,4], target = 6<br>
+                            <strong>Output:</strong> [1,2]
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">Example 3:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> nums = [3,3], target = 6<br>
+                            <strong>Output:</strong> [0,1]
+                        </div>
+                    </div>
+                    {% elif problem.id == 2 %}
+                    <div class="example-card">
+                        <div class="example-title">Example 1:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> x = 121<br>
+                            <strong>Output:</strong> true
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">Example 2:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> x = -121<br>
+                            <strong>Output:</strong> false
+                        </div>
+                    </div>
+                    <div class="example-card">
+                        <div class="example-title">Example 3:</div>
+                        <div class="example-content">
+                            <strong>Input:</strong> x = 10<br>
+                            <strong>Output:</strong> false
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="constraints-section">
+                    <div class="section-title">⚠️ Constraints</div>
+                    <ul class="constraints-list">
+                        {% if problem.id == 1 %}
+                        <li>2 ≤ nums.length ≤ 10⁴</li>
+                        <li>-10⁹ ≤ nums[i] ≤ 10⁹</li>
+                        <li>-10⁹ ≤ target ≤ 10⁹</li>
+                        {% elif problem.id == 2 %}
+                        <li>-2³¹ ≤ x ≤ 2³¹ - 1</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <div class="editor-header">
+                <div class="language-selector">
+                    <select id="language" onchange="changeLanguage()">
+                        <option value="python">🐍 Python</option>
+                        <option value="javascript">📜 JavaScript</option>
+                        <option value="java">☕ Java</option>
+                        <option value="cpp">⚙️ C++</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="editor-area">
+                <form method="POST" action="/submit_code" id="codeForm" style="height: 100%; display: flex; flex-direction: column;">
+                    <textarea id="code" name="code" spellcheck="false" style="flex: 1;">{{ problem.starter_code.python }}</textarea>
+                    <input type="hidden" name="language" id="hiddenLanguage" value="python">
+                    <input type="hidden" name="problem_id" value="{{ problem.id }}">
+                    
+                    <div class="action-buttons">
+                        <button type="button" class="run-btn" onclick="runCode()">▶ Run Code</button>
+                        <button type="submit" class="submit-btn">✓ Submit</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="output-section">
+                <div class="output-title">Output</div>
+                <div class="output-content" id="output">> Ready</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const starterCodes = {
+            python: `{{ problem.starter_code.python|safe }}`,
+            javascript: `{{ problem.starter_code.javascript|safe }}`,
+            java: `{{ problem.starter_code.java|safe }}`,
+            cpp: `{{ problem.starter_code.cpp|safe }}`
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('language').value;
+            const codeArea = document.getElementById('code');
+            if (starterCodes[lang]) {
+                codeArea.value = starterCodes[lang];
+            }
+            document.getElementById('hiddenLanguage').value = lang;
+        }
+
+        // SIMPLE THEME TOGGLE - This WILL work
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            
+            if (body.classList.contains('black-theme')) {
+                body.classList.remove('black-theme');
+                btn.innerHTML = '🌙 Dark Mode';
+                localStorage.setItem('theme', 'white');
+            } else {
+                body.classList.add('black-theme');
+                btn.innerHTML = '☀️ Light Mode';
+                localStorage.setItem('theme', 'black');
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'black') {
+            document.body.classList.add('black-theme');
+            document.getElementById('themeToggle').innerHTML = '☀️ Light Mode';
+        }
+
+        function runCode() {
+            const code = document.getElementById('code').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '> Running...\n';
+            
+            setTimeout(() => {
+                if (code.includes('return') && code.length > 50 && !code.includes('pass')) {
+                    outputDiv.innerHTML = '> ✅ All test cases passed!\n\n🎉 Great solution! Click "Submit" to save.';
+                } else if (code.includes('pass')) {
+                    outputDiv.innerHTML = '> ⚠️ Code needs implementation\n\n💡 Tip: Replace "pass" with your solution';
+                } else {
+                    outputDiv.innerHTML = '> ⚠️ Test cases failed\n\nTry again! Check your solution logic.';
+                }
+            }, 500);
+        }
+
+        // Tab completion
+        const textarea = document.getElementById('code');
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    </script>
+</body>
+</html>

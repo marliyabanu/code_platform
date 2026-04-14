@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review - {{ problem.title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', 'Segoe UI', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #333;
+            --card-bg: white;
+            --editor-bg: #1e1e1e;
+        }
+        body.dark {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #eee;
+            --card-bg: #0f3460;
+            --editor-bg: #0a0a0a;
+        }
+        .navbar {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+        .nav-link { text-decoration: none; color: var(--text-primary); font-weight: 500; }
+        .theme-toggle { background: none; border: none; font-size: 1.3rem; cursor: pointer; }
+        .logout-btn { background: linear-gradient(135deg, #f56565, #ed64a6); color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        .problem-section, .code-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .problem-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+        .problem-title { font-size: 1.5rem; color: var(--text-primary); }
+        .difficulty { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .easy { background: #48bb78; color: white; }
+        .medium { background: #ed8936; color: white; }
+        .hard { background: #f56565; color: white; }
+        .status-success { background: #48bb78; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-left: 1rem; }
+        .language-badge { background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
+        pre {
+            background: var(--editor-bg);
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-primary, .btn-secondary {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 2px solid #667eea; }
+        .btn-primary:hover, .btn-secondary:hover { transform: translateY(-2px); }
+        .info-text { color: var(--text-secondary); margin-top: 1rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">💻 CodePlatform</div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">🏠 Dashboard</a>
+            <a href="/problems" class="nav-link">📋 Problems</a>
+            <a href="/leaderboard" class="nav-link">🏆 Leaderboard</a>
+            <a href="/progress" class="nav-link">📊 Progress</a>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <a href="/logout" class="logout-btn">🚪 Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="problem-section">
+            <div class="problem-header">
+                <div>
+                    <h1 class="problem-title">{{ problem.title }}</h1>
+                    <span class="difficulty {{ problem.difficulty|lower }}">{{ problem.difficulty }}</span>
+                    {% if submission and submission.status == 'success' %}
+                        <span class="status-success">✅ Solved</span>
+                    {% endif %}
+                </div>
+            </div>
+            <p>{{ problem.description }}</p>
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                <strong>📌 Example:</strong><br>
+                {{ problem.example }}
+            </div>
+        </div>
+        <div class="code-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>📝 Your Previous Solution</h3>
+                {% if submission %}
+                    <span class="language-badge">{{ submission.language|upper }}</span>
+                {% endif %}
+            </div>
+            {% if submission %}
+                <pre><code>{{ submission.code }}</code></pre>
+                <div class="info-text">Submitted on: {{ submission.submitted_at[:19].replace('T', ' ') }}</div>
+            {% else %}
+                <div class="info-text">No previous submission found for this problem.</div>
+            {% endif %}
+            <div class="action-buttons">
+                <a href="/code?problem_id={{ problem.id }}" class="btn-primary">✏️ Edit & Improve</a>
+                <a href="/progress" class="btn-secondary">← Back to Progress</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const btn = document.querySelector('.theme-toggle');
+            if (document.body.classList.contains('dark')) {
+                btn.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                btn.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+    </script>
+</body>
+</html>
