@@ -3,49 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - CodePlatform</title>
+    <title>CodePlatform - Leaderboard</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --text-primary: #333;
-            --text-secondary: #666;
-            --card-bg: white;
+            background: #f5f5f5;
+            transition: background 0.3s ease;
         }
 
         body.dark {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --text-primary: #eee;
-            --text-secondary: #aaa;
-            --card-bg: #0f3460;
+            background: #0a0f1e;
         }
 
         .navbar {
-            background: var(--card-bg);
+            background: white;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        body.dark .navbar {
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
         }
 
         .logo {
             font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-weight: 800;
+            color: #000000;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .logo {
+            background: linear-gradient(135deg, #fff, #3bc9ff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -57,193 +57,347 @@
             align-items: center;
         }
 
-        .nav-link {
+        .nav-links a {
+            color: #4b5563;
             text-decoration: none;
-            color: var(--text-primary);
             font-weight: 500;
-            transition: all 0.3s;
+        }
+
+        body.dark .nav-links a {
+            color: #b0c4ff;
+        }
+
+        .nav-links a:hover {
+            color: #000000;
+        }
+
+        body.dark .nav-links a:hover {
+            color: #3bc9ff;
+        }
+
+        .logout-btn {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        body.dark .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
         }
 
         .theme-toggle {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
         }
 
-        .logout-btn {
-            background: linear-gradient(135deg, #f56565, #ed64a6);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            text-decoration: none;
+        body.dark .theme-toggle {
+            color: #fbbf24;
         }
 
         .container {
             max-width: 1000px;
             margin: 2rem auto;
-            padding: 2rem;
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
+            padding: 0 2rem;
         }
 
         .leaderboard-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            overflow: hidden;
-            animation: slideUp 0.6s ease;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        body.dark .leaderboard-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
         }
 
         .leaderboard-header {
-            display: grid;
-            grid-template-columns: 80px 1fr 120px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .leaderboard-card h1 {
+            color: #111827;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .leaderboard-card h1 {
             color: white;
+        }
+
+        .refresh-btn {
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        body.dark .refresh-btn {
+            background: rgba(10, 20, 35, 0.8);
+            border-color: #2c3e66;
+            color: #b0c4ff;
+        }
+
+        .refresh-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .last-updated {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
             padding: 1rem;
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark th {
+            background: rgba(0, 0, 0, 0.3);
+            color: #3bc9ff;
+            border-bottom: 1px solid rgba(72, 187, 255, 0.2);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            color: #4b5563;
+            transition: border 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e6;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        body.dark tr:hover {
+            background: rgba(59, 201, 255, 0.1);
+        }
+
+        .rank-1 {
+            color: #f59e0b;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .rank-2 {
+            color: #9ca3af;
             font-weight: bold;
         }
 
-        .leaderboard-item {
-            display: grid;
-            grid-template-columns: 80px 1fr 120px;
-            padding: 1rem;
-            border-bottom: 1px solid var(--bg-secondary);
-            transition: all 0.3s;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .leaderboard-item:hover {
-            background: var(--bg-secondary);
-            transform: translateX(5px);
-        }
-
-        .rank {
+        .rank-3 {
+            color: #cd7f32;
             font-weight: bold;
+        }
+
+        .current-user {
+            background: rgba(59, 201, 255, 0.15);
+            font-weight: bold;
+        }
+
+        body.dark .current-user {
+            background: rgba(59, 201, 255, 0.2);
+        }
+
+        .trophy-icon {
             font-size: 1.2rem;
         }
 
-        .rank-1 { color: #FFD700; }
-        .rank-2 { color: #C0C0C0; }
-        .rank-3 { color: #CD7F32; }
-
-        .username {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .score {
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .back-btn {
+        .back-link {
             display: inline-block;
-            margin-top: 2rem;
-            padding: 12px 30px;
-            background: var(--card-bg);
-            color: var(--text-primary);
+            margin-top: 1.5rem;
+            color: #000000;
             text-decoration: none;
-            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        body.dark .back-link {
+            color: #3bc9ff;
+        }
+
+        .loading {
             text-align: center;
-            transition: all 0.3s;
+            padding: 2rem;
+            color: #9ca3af;
         }
 
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        .solved-count {
+            font-weight: 600;
         }
 
-        @media (max-width: 768px) {
-            .leaderboard-header, .leaderboard-item {
-                grid-template-columns: 60px 1fr 80px;
-                font-size: 14px;
-            }
+        .solved-highlight {
+            color: #059669;
+        }
+
+        body.dark .solved-highlight {
+            color: #34d399;
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">💻 CodePlatform</div>
+        <div class="logo">⌨️ CodePlatform</div>
         <div class="nav-links">
-            <a href="/dashboard" class="nav-link">🏠 Dashboard</a>
-            <a href="/code" class="nav-link">✏️ Code</a>
-            <a href="/leaderboard" class="nav-link">🏆 Leaderboard</a>
-            <a href="/progress" class="nav-link">📊 Progress</a>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-            <a href="/logout" class="logout-btn">🚪 Logout</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/problems">Problems</a>
+            <a href="/leaderboard" style="font-weight:600;">Leaderboard</a>
+            <a href="/progress">Progress</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+            <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <h1>🏆 Global Leaderboard</h1>
-        
         <div class="leaderboard-card">
             <div class="leaderboard-header">
-                <div>Rank</div>
-                <div>User</div>
-                <div>Problems Solved</div>
+                <h1>🏆 Global Leaderboard</h1>
+                <button class="refresh-btn" onclick="refreshLeaderboard()">🔄 Refresh</button>
             </div>
             
-            {% for leader in leaders %}
-            <div class="leaderboard-item" style="animation-delay: {{ loop.index * 0.05 }}s">
-                <div class="rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
-                    {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}#{{ loop.index }}{% endif %}
-                </div>
-                <div class="username">{{ leader.username }}</div>
-                <div class="score">{{ leader.solved_count }} solved</div>
+            <div id="leaderboardTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Problems Solved</th>
+                            <th>Submissions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        {% for user in leaderboard %}
+                        <tr class="{% if user.username == username %}current-user{% endif %}">
+                            <td class="rank-{{ loop.index }}">
+                                {% if loop.index == 1 %}🏆 #{{ loop.index }}
+                                {% elif loop.index == 2 %}🥈 #{{ loop.index }}
+                                {% elif loop.index == 3 %}🥉 #{{ loop.index }}
+                                {% else %}#{{ loop.index }}{% endif %}
+                            </td>
+                            <td>
+                                {{ user.username }}
+                                {% if user.username == username %} 
+                                    <span style="font-size: 0.7rem; color: #3bc9ff;">(you)</span>
+                                {% endif %}
+                            </td>
+                            <td class="solved-count">
+                                <span class="{% if user.solved > 0 %}solved-highlight{% endif %}">
+                                    {{ user.solved }}/100
+                                </span>
+                            </td>
+                            <td>{{ user.submissions }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No users yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% else %}
-            <div class="leaderboard-item">No data available yet</div>
-            {% endfor %}
+            <div class="last-updated" id="lastUpdated">
+                Last updated: {{ now }}
+            </div>
+            <a href="/dashboard" class="back-link">← Back to Dashboard</a>
         </div>
-        
-        <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
     </div>
 
     <script>
         function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const btn = document.querySelector('.theme-toggle');
-            if (document.body.classList.contains('dark')) {
-                btn.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                btn.textContent = '🌙';
+            const body = document.body;
+            const toggleBtn = document.getElementById('themeToggle');
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
+                toggleBtn.textContent = '🌙';
+            } else {
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                toggleBtn.textContent = '☀️';
             }
         }
-        
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark');
-            document.querySelector('.theme-toggle').textContent = '☀️';
+
+        async function refreshLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="loading">🔄 Loading...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/leaderboard');
+                const data = await response.json();
+                
+                if (data.success) {
+                    tbody.innerHTML = '';
+                    data.leaderboard.forEach((user, index) => {
+                        const row = tbody.insertRow();
+                        let rankHtml = '';
+                        if (index === 0) rankHtml = '🏆 #1';
+                        else if (index === 1) rankHtml = '🥈 #2';
+                        else if (index === 2) rankHtml = '🥉 #3';
+                        else rankHtml = `#${index + 1}`;
+                        
+                        row.innerHTML = `
+                            <td class="rank-${index + 1}">${rankHtml}</td>
+                            <td>
+                                ${user.username}
+                                ${user.username === '{{ username }}' ? ' <span style="font-size: 0.7rem; color: #3bc9ff;">(you)</span>' : ''}
+                            </td>
+                            <td class="solved-count">
+                                <span class="${user.solved > 0 ? 'solved-highlight' : ''}">
+                                    ${user.solved}/100
+                                </span>
+                            </td>
+                            <td>${user.submissions}</td>
+                        `;
+                        if (user.username === '{{ username }}') {
+                            row.classList.add('current-user');
+                        }
+                    });
+                    
+                    const now = new Date();
+                    document.getElementById('lastUpdated').innerHTML = `Last updated: ${now.toLocaleString()}`;
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">❌ Error loading leaderboard</td></tr>';
+            }
         }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').textContent = '☀️';
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshLeaderboard, 30000);
     </script>
 </body>
 </html>

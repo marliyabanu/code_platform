@@ -3,58 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress - CodePlatform</title>
+    <title>CodePlatform - Progress</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --card-bg: #ffffff;
-            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            --border: #e0e0e0;
+            background: #f5f5f5;
+            transition: background 0.3s ease;
         }
 
         body.dark {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --text-primary: #eeeeee;
-            --text-secondary: #aaaaaa;
-            --card-bg: #0f3460;
-            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            --border: #2a2a4a;
+            background: #0a0f1e;
         }
 
         .navbar {
-            background: var(--card-bg);
+            background: white;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow);
+            border-bottom: 1px solid #e5e7eb;
             position: sticky;
             top: 0;
             z-index: 100;
-            flex-wrap: wrap;
-            gap: 1rem;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        body.dark .navbar {
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
         }
 
         .logo {
             font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-weight: 800;
+            color: #000000;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .logo {
+            background: linear-gradient(135deg, #fff, #3bc9ff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -62,20 +56,37 @@
 
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             align-items: center;
-            flex-wrap: wrap;
         }
 
-        .nav-link {
+        .nav-links a {
+            color: #4b5563;
             text-decoration: none;
-            color: var(--text-primary);
             font-weight: 500;
-            transition: all 0.3s;
         }
 
-        .nav-link:hover {
-            color: #667eea;
+        body.dark .nav-links a {
+            color: #b0c4ff;
+        }
+
+        .nav-links a:hover {
+            color: #000000;
+        }
+
+        body.dark .nav-links a:hover {
+            color: #3bc9ff;
+        }
+
+        .logout-btn {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        body.dark .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
         }
 
         .theme-toggle {
@@ -83,28 +94,12 @@
             border: none;
             font-size: 1.3rem;
             cursor: pointer;
-            padding: 8px;
+            padding: 0.5rem;
             border-radius: 50%;
-            transition: all 0.3s;
         }
 
-        .theme-toggle:hover {
-            transform: rotate(180deg);
-            background: var(--bg-secondary);
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #f56565, #ed64a6);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        body.dark .theme-toggle {
+            color: #fbbf24;
         }
 
         .container {
@@ -113,345 +108,547 @@
             padding: 0 2rem;
         }
 
-        h1 {
+        .page-title {
+            color: #111827;
+            font-size: 2rem;
+            margin-bottom: 2rem;
             text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .page-title {
             color: white;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Stats Card */
-        .stats-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2rem;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: var(--shadow);
-            animation: fadeInDown 0.6s ease;
+            border: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        body.dark .stat-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
         }
 
-        .big-number {
-            font-size: 3.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #000000;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .stat-value {
+            background: linear-gradient(135deg, #fff, #3bc9ff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .progress-bar-container {
-            background: var(--bg-secondary);
-            border-radius: 15px;
-            height: 30px;
-            margin: 1.5rem 0;
-            overflow: hidden;
+        .stat-label {
+            color: #6b7280;
+            margin-top: 0.5rem;
+            transition: color 0.3s ease;
         }
 
-        .progress-bar {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            height: 100%;
-            border-radius: 15px;
-            transition: width 1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
+        body.dark .stat-label {
+            color: #8ba3c7;
         }
 
-        /* Difficulty Stats */
-        .difficulty-stats {
+        .difficulty-section {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .difficulty-card {
-            background: var(--card-bg);
+            background: white;
+            border-radius: 1.5rem;
             padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            animation: fadeInUp 0.6s ease;
+            border: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
-        .difficulty-card:hover {
-            transform: translateY(-5px);
+        body.dark .difficulty-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .difficulty-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
         }
 
-        .easy-color { color: #48bb78; font-size: 2rem; }
-        .medium-color { color: #ed8936; font-size: 2rem; }
-        .hard-color { color: #f56565; font-size: 2rem; }
+        .difficulty-title.easy { color: #065f46; }
+        .difficulty-title.medium { color: #92400e; }
+        .difficulty-title.hard { color: #991b1b; }
 
-        .difficulty-card .number {
-            font-size: 2rem;
+        body.dark .difficulty-title.easy { color: #34d399; }
+        body.dark .difficulty-title.medium { color: #fbbf24; }
+        body.dark .difficulty-title.hard { color: #f87171; }
+
+        .progress-bar-container {
+            background: #e5e7eb;
+            border-radius: 1rem;
+            height: 1.5rem;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        body.dark .progress-bar-container {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 1rem;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
             font-weight: bold;
-            margin: 0.5rem 0;
         }
 
-        /* Solved List */
+        .fill-easy { background: #059669; }
+        .fill-medium { background: #d97706; }
+        .fill-hard { background: #dc2626; }
+
+        body.dark .fill-easy { background: linear-gradient(90deg, #10b981, #34d399); }
+        body.dark .fill-medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        body.dark .fill-hard { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        .stats-text {
+            color: #6b7280;
+            text-align: center;
+            margin-top: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .stats-text {
+            color: #8ba3c7;
+        }
+
+        /* Solved Problems List with Reviews */
         .solved-list {
-            background: var(--card-bg);
-            border-radius: 20px;
+            background: white;
+            border-radius: 1.5rem;
             padding: 1.5rem;
-            margin-top: 2rem;
-            box-shadow: var(--shadow);
-            animation: fadeInUp 0.8s ease;
+            border: 1px solid #e5e7eb;
+            margin-top: 1rem;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        body.dark .solved-list {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
         }
 
         .solved-list h3 {
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
+            color: #111827;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .solved-list h3 {
+            color: white;
+        }
+
+        .solved-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.3s ease;
+        }
+
+        .solved-item:hover {
+            background: #f9fafb;
+        }
+
+        body.dark .solved-item:hover {
+            background: rgba(59, 201, 255, 0.1);
+        }
+
+        .solved-item-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .solved-id {
+            font-weight: bold;
+            color: #111827;
+            min-width: 50px;
+        }
+
+        body.dark .solved-id {
+            color: #3bc9ff;
+        }
+
+        .solved-title {
+            color: #4b5563;
+        }
+
+        body.dark .solved-title {
+            color: #cbd5e6;
+        }
+
+        .difficulty-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .review-status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .solved-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            transition: all 0.3s;
+        .reviewed-badge {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
         }
 
-        .solved-item:hover {
-            background: var(--bg-secondary);
-            transform: translateX(5px);
-            border-radius: 10px;
+        body.dark .reviewed-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
         }
 
-        .solved-item:last-child {
-            border-bottom: none;
-        }
-
-        .difficulty-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .review-link {
-            color: #667eea;
+        .review-btn {
+            padding: 0.3rem 1rem;
+            background: #000000;
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
             text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-            padding: 5px 15px;
-            border-radius: 20px;
+            font-size: 0.8rem;
+            transition: 0.2s;
         }
 
-        .review-link:hover {
-            background: #667eea;
+        body.dark .review-btn {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        }
+
+        .review-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .rating-stars {
+            color: #f59e0b;
+            font-size: 0.8rem;
+        }
+
+        .no-solved {
+            text-align: center;
+            color: #9ca3af;
+            padding: 2rem;
+        }
+
+        /* Modal for Review */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        body.dark .modal-content {
+            background: #1e293b;
+        }
+
+        .modal-content h3 {
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        body.dark .modal-content h3 {
             color: white;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #9ca3af;
         }
 
-        .empty-state a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
+        .rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin: 1rem 0;
         }
 
-        .back-btn {
-            display: inline-block;
-            margin-top: 2rem;
-            padding: 12px 30px;
-            background: var(--card-bg);
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 30px;
-            text-align: center;
-            transition: all 0.3s;
-            box-shadow: var(--shadow);
+        .rating-input input {
+            display: none;
         }
 
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .rating-input label {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #d1d5db;
+            transition: 0.2s;
         }
 
-        /* Motivational Message */
-        .motivation {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
-            border-radius: 15px;
-            color: var(--text-primary);
+        .rating-input label:hover,
+        .rating-input label:hover ~ label,
+        .rating-input input:checked ~ label {
+            color: #f59e0b;
         }
 
-        @media (max-width: 768px) {
-            .container { padding: 0 1rem; }
-            h1 { font-size: 1.8rem; }
-            .difficulty-stats { grid-template-columns: 1fr; }
-            .solved-item { flex-direction: column; text-align: center; }
-            .nav-links { gap: 1rem; }
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            resize: vertical;
+        }
+
+        body.dark textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: white;
+        }
+
+        .submit-review {
+            width: 100%;
+            padding: 0.8rem;
+            background: #000000;
+            border: none;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        body.dark .submit-review {
+            background: linear-gradient(135deg, #10b981, #34d399);
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">💻 CodePlatform</div>
+        <div class="logo">⌨️ CodePlatform</div>
         <div class="nav-links">
-            <a href="/dashboard" class="nav-link">🏠 Dashboard</a>
-            <a href="/problems" class="nav-link">📋 Problems</a>
-            <a href="/leaderboard" class="nav-link">🏆 Leaderboard</a>
-            <a href="/progress" class="nav-link">📊 Progress</a>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-            <a href="/logout" class="logout-btn">🚪 Logout</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/problems">Problems</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="/progress" style="font-weight:600;">Progress</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+            <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <h1>📊 Your Coding Progress</h1>
+        <h1 class="page-title">📊 Your Coding Progress</h1>
         
-        <div class="stats-card">
-            <div class="big-number">{{ solved_problems }} / {{ total_problems }}</div>
-            <p style="margin-top: 0.5rem;">Problems Solved</p>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: {{ (solved_problems / total_problems * 100)|round|int if total_problems > 0 else 0 }}%">
-                    {{ (solved_problems / total_problems * 100)|round|int if total_problems > 0 else 0 }}%
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value">{{ solved_count }}/100</div><div class="stat-label">Problems Solved</div></div>
+            <div class="stat-card"><div class="stat-value">{{ "%.1f"|format((solved_count/100)*100) }}%</div><div class="stat-label">Completion Rate</div></div>
+        </div>
+
+        <div class="difficulty-section">
+            <div class="difficulty-card">
+                <div class="difficulty-title easy">📗 Easy Problems</div>
+                <div class="progress-bar-container"><div class="progress-fill fill-easy" style="width: {{ (easy_solved/easy_total)*100 if easy_total>0 else 0 }}%;">{{ "%.0f"|format((easy_solved/easy_total)*100 if easy_total>0 else 0) }}%</div></div>
+                <div class="stats-text">{{ easy_solved }} / {{ easy_total }} solved</div>
+            </div>
+            <div class="difficulty-card">
+                <div class="difficulty-title medium">📙 Medium Problems</div>
+                <div class="progress-bar-container"><div class="progress-fill fill-medium" style="width: {{ (medium_solved/medium_total)*100 if medium_total>0 else 0 }}%;">{{ "%.0f"|format((medium_solved/medium_total)*100 if medium_total>0 else 0) }}%</div></div>
+                <div class="stats-text">{{ medium_solved }} / {{ medium_total }} solved</div>
+            </div>
+            <div class="difficulty-card">
+                <div class="difficulty-title hard">📕 Hard Problems</div>
+                <div class="progress-bar-container"><div class="progress-fill fill-hard" style="width: {{ (hard_solved/hard_total)*100 if hard_total>0 else 0 }}%;">{{ "%.0f"|format((hard_solved/hard_total)*100 if hard_total>0 else 0) }}%</div></div>
+                <div class="stats-text">{{ hard_solved }} / {{ hard_total }} solved</div>
+            </div>
+        </div>
+
+        <!-- Solved Problems List with Review Buttons -->
+        <div class="solved-list">
+            <h3>✅ Solved Problems - Rate & Review</h3>
+            {% if solved_list and solved_list|length > 0 %}
+                {% for problem in solved_list %}
+                <div class="solved-item">
+                    <div class="solved-item-info">
+                        <span class="solved-id">#{{ problem.id }}</span>
+                        <span class="solved-title">{{ problem.title }}</span>
+                        <span class="difficulty-badge {{ problem.difficulty }}" style="background: {% if problem.difficulty == 'Easy' %}#d1fae5{% elif problem.difficulty == 'Medium' %}#fed7aa{% else %}#fee2e2{% endif %}; color: {% if problem.difficulty == 'Easy' %}#065f46{% elif problem.difficulty == 'Medium' %}#92400e{% else %}#991b1b{% endif %};">
+                            {{ problem.difficulty }}
+                        </span>
+                    </div>
+                    <div class="review-status">
+                        {% if problem.reviewed %}
+                            <span class="reviewed-badge">
+                                {% for i in range(problem.rating) %}★{% endfor %}
+                                {% for i in range(5 - problem.rating) %}☆{% endfor %}
+                            </span>
+                        {% else %}
+                            <button class="review-btn" onclick="openReviewModal({{ problem.id }}, '{{ problem.title }}')">⭐ Rate & Review</button>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="difficulty-stats">
-            <div class="difficulty-card">
-                <div class="easy-color">🟢</div>
-                <div class="number">{{ easy_solved }}</div>
-                <p>Easy Problems Solved</p>
-                <small>{{ ((easy_solved / 40) * 100)|round|int if easy_solved else 0 }}% of Easy</small>
-            </div>
-            <div class="difficulty-card">
-                <div class="medium-color">🟠</div>
-                <div class="number">{{ medium_solved }}</div>
-                <p>Medium Problems Solved</p>
-                <small>{{ ((medium_solved / 30) * 100)|round|int if medium_solved else 0 }}% of Medium</small>
-            </div>
-            <div class="difficulty-card">
-                <div class="hard-color">🔴</div>
-                <div class="number">{{ hard_solved }}</div>
-                <p>Hard Problems Solved</p>
-                <small>{{ ((hard_solved / 30) * 100)|round|int if hard_solved else 0 }}% of Hard</small>
-            </div>
-        </div>
-
-        {% if solved_problems_list %}
-        <div class="solved-list">
-            <h3>
-                <span>✅</span> Solved Problems
-                <span style="font-size: 0.8rem; font-weight: normal;">({{ solved_problems }} problems)</span>
-            </h3>
-            {% for problem in solved_problems_list %}
-            <div class="solved-item">
-                <span>
-                    <strong>#{{ problem.id }}</strong> - {{ problem.title }}
-                </span>
-                <span class="difficulty-badge" style="background: 
-                    {% if problem.difficulty == 'Easy' %}#48bb78
-                    {% elif problem.difficulty == 'Medium' %}#ed8936
-                    {% else %}#f56565{% endif %}; color: white;">
-                    {{ problem.difficulty }}
-                </span>
-                <a href="/review/{{ problem.id }}" class="review-link">Review →</a>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="solved-list">
-            <div class="empty-state">
-                <p>📭 No problems solved yet.</p>
-                <p>Start solving <a href="/problems">problems here</a>!</p>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="motivation">
-            {% if solved_problems == 0 %}
-                🌟 Every expert was once a beginner. Start your first problem today!
-            {% elif solved_problems < 10 %}
-                🚀 Great start! You're on your way to becoming a coding master!
-            {% elif solved_problems < 30 %}
-                💪 Awesome progress! Keep pushing forward!
-            {% elif solved_problems < 50 %}
-                🎉 You're doing amazing! Halfway there!
-            {% elif solved_problems < 80 %}
-                🔥 Incredible! You're almost there!
+                {% endfor %}
             {% else %}
-                🏆 Legendary! You're a coding champion!
+                <div class="no-solved">
+                    📝 No problems solved yet. Start coding to see your progress!
+                </div>
             {% endif %}
         </div>
+    </div>
 
-        <div style="text-align: center;">
-            <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeReviewModal()">&times;</span>
+            <h3>⭐ Rate & Review Problem</h3>
+            <p id="modalProblemTitle" style="color: #6b7280; margin-bottom: 1rem;"></p>
+            
+            <form id="reviewForm">
+                <input type="hidden" id="problemId" name="problem_id">
+                <label>Your Rating:</label>
+                <div class="rating-input">
+                    <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
+                    <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+                    <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+                    <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+                    <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+                </div>
+                
+                <label>Your Review (optional):</label>
+                <textarea id="reviewComment" rows="3" placeholder="Share your thoughts about this problem..."></textarea>
+                
+                <button type="button" class="submit-review" onclick="submitReview()">Submit Review</button>
+            </form>
         </div>
     </div>
 
     <script>
+        let currentProblemId = null;
+
+        function openReviewModal(problemId, problemTitle) {
+            currentProblemId = problemId;
+            document.getElementById('modalProblemTitle').innerHTML = `<strong>Problem #${problemId}</strong> - ${problemTitle}`;
+            document.getElementById('problemId').value = problemId;
+            document.getElementById('reviewComment').value = '';
+            // Clear rating selection
+            document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+            currentProblemId = null;
+        }
+
+        async function submitReview() {
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('reviewComment').value;
+            
+            if (!rating) {
+                alert('Please select a rating (1-5 stars)');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/submit_review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        problem_id: currentProblemId,
+                        rating: parseInt(rating.value),
+                        comment: comment
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Review submitted successfully!');
+                    closeReviewModal();
+                    location.reload();
+                } else {
+                    alert('❌ ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error submitting review');
+            }
+        }
+
         function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const btn = document.querySelector('.theme-toggle');
-            if (document.body.classList.contains('dark')) {
-                btn.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                btn.textContent = '🌙';
+            const body = document.body;
+            const toggleBtn = document.getElementById('themeToggle');
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
+                toggleBtn.textContent = '🌙';
+            } else {
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                toggleBtn.textContent = '☀️';
             }
         }
 
-        if (localStorage.getItem('theme') === 'dark') {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
             document.body.classList.add('dark');
-            document.querySelector('.theme-toggle').textContent = '☀️';
+            document.getElementById('themeToggle').textContent = '☀️';
         }
 
-        // Animate progress bar on load
-        window.addEventListener('load', function() {
-            const progressBar = document.querySelector('.progress-bar');
-            if (progressBar) {
-                const width = progressBar.style.width;
-                progressBar.style.width = '0%';
-                setTimeout(() => {
-                    progressBar.style.width = width;
-                }, 100);
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('reviewModal');
+            if (event.target === modal) {
+                closeReviewModal();
             }
-        });
+        }
     </script>
 </body>
 </html>

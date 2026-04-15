@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 import sqlite3
-from datetime import datetime
 import hashlib
 import os
+import subprocess
+import tempfile
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_change_this_12345_67890'
+app.secret_key = 'your_secret_key_change_this_in_production'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'database.db')
@@ -18,409 +20,420 @@ def get_db():
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# Complete Problems Data with ALL required fields
-PROBLEMS = {
-    1: {
-        'id': 1,
-        'title': 'Two Sum',
-        'difficulty': 'Easy',
-        'description': 'Given an array of integers nums and an integer target, return indices of the two numbers that add up to target.',
-        'example': 'Input: nums = [2,7,11,15], target = 9\nOutput: [0,1]\nExplanation: nums[0] + nums[1] = 2 + 7 = 9',
-        'constraints': '• 2 ≤ nums.length ≤ 10⁴\n• -10⁹ ≤ nums[i] ≤ 10⁹\n• -10⁹ ≤ target ≤ 10⁹',
-        'starter_code': {
-            'python': 'def two_sum(nums, target):\n    # Write your solution here\n    pass',
-            'javascript': 'function twoSum(nums, target) {\n    // Write your solution here\n}',
-            'java': 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your solution here\n        return new int[0];\n    }\n}',
-            'cpp': 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your solution here\n        return {};\n    }\n};'
-        }
-    },
-    2: {
-        'id': 2,
-        'title': 'Palindrome Number',
-        'difficulty': 'Easy',
-        'description': 'Given an integer x, return true if x is a palindrome, and false otherwise.',
-        'example': 'Input: x = 121\nOutput: true\n\nInput: x = -121\nOutput: false',
-        'constraints': '• -2³¹ ≤ x ≤ 2³¹ - 1',
-        'starter_code': {
-            'python': 'def is_palindrome(x):\n    # Write your solution here\n    pass',
-            'javascript': 'function isPalindrome(x) {\n    // Write your solution here\n}',
-            'java': 'class Solution {\n    public boolean isPalindrome(int x) {\n        // Write your solution here\n        return false;\n    }\n}',
-            'cpp': 'class Solution {\npublic:\n    bool isPalindrome(int x) {\n        // Write your solution here\n        return false;\n    }\n};'
-        }
-    },
-    3: {
-        'id': 3,
-        'title': 'Valid Parentheses',
-        'difficulty': 'Easy',
-        'description': 'Given a string s containing just the characters "(", ")", "{", "}", "[", "]", determine if the input string is valid.',
-        'example': 'Input: s = "()"\nOutput: true\n\nInput: s = "()[]{}"\nOutput: true',
-        'constraints': '• 1 ≤ s.length ≤ 10⁴',
-        'starter_code': {
-            'python': 'def is_valid(s):\n    # Write your solution here\n    pass',
-            'javascript': 'function isValid(s) {\n    // Write your solution here\n}',
-            'java': 'class Solution {\n    public boolean isValid(String s) {\n        // Write your solution here\n        return false;\n    }\n}',
-            'cpp': 'class Solution {\npublic:\n    bool isValid(string s) {\n        // Write your solution here\n        return false;\n    }\n};'
-        }
-    },
-    4: {
-        'id': 4,
-        'title': 'Reverse Integer',
-        'difficulty': 'Medium',
-        'description': 'Given a signed 32-bit integer x, return x with its digits reversed.',
-        'example': 'Input: x = 123\nOutput: 321\n\nInput: x = -123\nOutput: -321',
-        'constraints': '• -2³¹ ≤ x ≤ 2³¹ - 1',
-        'starter_code': {
-            'python': 'def reverse(x):\n    # Write your solution here\n    pass',
-            'javascript': 'function reverse(x) {\n    // Write your solution here\n}',
-            'java': 'class Solution {\n    public int reverse(int x) {\n        // Write your solution here\n        return 0;\n    }\n}',
-            'cpp': 'class Solution {\npublic:\n    int reverse(int x) {\n        // Write your solution here\n        return 0;\n    }\n};'
-        }
-    }
-}
-
-# Generate problems 5 to 100
-for i in range(5, 101):
-    if i <= 40:
-        difficulty = "Easy"
-        title = f"Problem {i}"
-    elif i <= 70:
-        difficulty = "Medium"
-        title = f"Problem {i}"
-    else:
-        difficulty = "Hard"
-        title = f"Problem {i}"
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
     
-    PROBLEMS[i] = {
-        'id': i,
-        'title': title,
-        'difficulty': difficulty,
-        'description': f'Solve problem #{i}. Write an efficient solution.',
-        'example': f'Example for problem {i}',
-        'constraints': 'Standard constraints apply.',
-        'starter_code': {
-            'python': f'def solve_problem_{i}(data):\n    # Write your solution here\n    pass',
-            'javascript': f'function solveProblem{i}(data) {{\n    // Write your solution here\n}}',
-            'java': f'class Solution {{\n    public int solveProblem{i}(int[] data) {{\n        // Write your solution here\n        return 0;\n    }}\n}}',
-            'cpp': f'class Solution {{\npublic:\n    int solveProblem{i}(vector<int>& data) {{\n        // Write your solution here\n        return 0;\n    }}\n}};'
-        }
-    }
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            solved_problems TEXT DEFAULT '[]',
+            submissions INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            problem_id INTEGER NOT NULL,
+            code TEXT NOT NULL,
+            language TEXT DEFAULT 'python',
+            status TEXT DEFAULT 'accepted',
+            submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
+    except:
+        pass
+    
+    conn.commit()
+    conn.close()
+    print("✅ Database initialized!")
+
+init_db()
+# ========== 100 UNIQUE PROBLEMS ==========
+PROBLEMS = {
+    1: {"title": "Two Sum", "difficulty": "Easy", "description": "Find two numbers that add up to target.", "examples": "Input: nums=[2,7,11,15], target=9 → Output: [0,1]", "constraints": "2 <= nums.length <= 10^4"},
+    2: {"title": "Palindrome Number", "difficulty": "Easy", "description": "Given an integer x, return true if x is a palindrome, and false otherwise.", "examples": "Input: x = 121 → Output: true", "constraints": "-2^31 <= x <= 2^31 - 1"},
+    3: {"title": "Valid Parentheses", "difficulty": "Easy", "description": "Check if brackets are valid.", "examples": "Input: '()[]{}' → Output: true", "constraints": "1 <= s.length <= 10^4"},
+    4: {"title": "Reverse Integer", "difficulty": "Easy", "description": "Reverse digits of an integer.", "examples": "Input: 123 → Output: 321", "constraints": "-2^31 <= x <= 2^31 - 1"},
+    5: {"title": "Roman to Integer", "difficulty": "Easy", "description": "Convert Roman numeral to integer.", "examples": "Input: 'MCMXCIV' → Output: 1994", "constraints": "1 <= s.length <= 15"},
+    6: {"title": "Longest Common Prefix", "difficulty": "Easy", "description": "Find longest common prefix string.", "examples": "Input: ['flower','flow','flight'] → Output: 'fl'", "constraints": "1 <= strs.length <= 200"},
+    7: {"title": "Merge Two Sorted Lists", "difficulty": "Easy", "description": "Merge two sorted linked lists.", "examples": "Input: list1=[1,2,4], list2=[1,3,4] → Output: [1,1,2,3,4,4]", "constraints": "0 <= node count <= 50"},
+    8: {"title": "Remove Duplicates", "difficulty": "Easy", "description": "Remove duplicates from sorted array.", "examples": "Input: [1,1,2] → Output: 2", "constraints": "1 <= nums.length <= 3*10^4"},
+    9: {"title": "Plus One", "difficulty": "Easy", "description": "Add one to number represented as array.", "examples": "Input: [1,2,3] → Output: [1,2,4]", "constraints": "1 <= digits.length <= 100"},
+    10: {"title": "Climbing Stairs", "difficulty": "Easy", "description": "Count ways to climb n stairs.", "examples": "Input: n=3 → Output: 3", "constraints": "1 <= n <= 45"},
+    11: {"title": "Single Number", "difficulty": "Easy", "description": "Find element that appears once.", "examples": "Input: [2,2,1] → Output: 1", "constraints": "1 <= nums.length <= 3*10^4"},
+    12: {"title": "Majority Element", "difficulty": "Easy", "description": "Find element appearing more than n/2 times.", "examples": "Input: [3,2,3] → Output: 3", "constraints": "1 <= n <= 5*10^4"},
+    13: {"title": "Best Time to Buy Stock", "difficulty": "Easy", "description": "Maximize profit from stock prices.", "examples": "Input: [7,1,5,3,6,4] → Output: 5", "constraints": "1 <= prices.length <= 10^5"},
+    14: {"title": "Move Zeroes", "difficulty": "Easy", "description": "Move all zeros to end.", "examples": "Input: [0,1,0,3,12] → Output: [1,3,12,0,0]", "constraints": "1 <= nums.length <= 10^4"},
+    15: {"title": "Valid Anagram", "difficulty": "Easy", "description": "Check if strings are anagrams.", "examples": "Input: s='anagram', t='nagaram' → Output: true", "constraints": "1 <= s.length <= 5*10^4"},
+    16: {"title": "Missing Number", "difficulty": "Easy", "description": "Find missing number in array.", "examples": "Input: [3,0,1] → Output: 2", "constraints": "1 <= n <= 10^4"},
+    17: {"title": "Contains Duplicate", "difficulty": "Easy", "description": "Check if any value appears twice.", "examples": "Input: [1,2,3,1] → Output: true", "constraints": "1 <= nums.length <= 10^5"},
+    18: {"title": "Maximum Subarray", "difficulty": "Easy", "description": "Find largest sum subarray.", "examples": "Input: [-2,1,-3,4,-1,2,1,-5,4] → Output: 6", "constraints": "1 <= nums.length <= 10^5"},
+    19: {"title": "FizzBuzz", "difficulty": "Easy", "description": "Print Fizz for multiples of 3, Buzz for 5.", "examples": "Input: n=5 → Output: ['1','2','Fizz','4','Buzz']", "constraints": "1 <= n <= 10^4"},
+    20: {"title": "Reverse String", "difficulty": "Easy", "description": "Reverse a string in place.", "examples": "Input: ['h','e','l','l','o'] → Output: ['o','l','l','e','h']", "constraints": "1 <= s.length <= 10^5"},
+    21: {"title": "3Sum", "difficulty": "Medium", "description": "Find triplets that sum to zero.", "examples": "Input: [-1,0,1,2,-1,-4] → Output: [[-1,-1,2],[-1,0,1]]", "constraints": "3 <= nums.length <= 3000"},
+    22: {"title": "Group Anagrams", "difficulty": "Medium", "description": "Group strings by anagram.", "examples": "Input: ['eat','tea','tan','ate','nat','bat'] → Output: groups", "constraints": "1 <= strs.length <= 10^4"},
+    23: {"title": "Longest Substring", "difficulty": "Medium", "description": "Longest substring without repeating chars.", "examples": "Input: 'abcabcbb' → Output: 3", "constraints": "0 <= s.length <= 5*10^4"},
+    24: {"title": "Container With Most Water", "difficulty": "Medium", "description": "Find max water container.", "examples": "Input: [1,8,6,2,5,4,8,3,7] → Output: 49", "constraints": "2 <= n <= 10^5"},
+    25: {"title": "Search in Rotated Array", "difficulty": "Medium", "description": "Search in rotated sorted array.", "examples": "Input: nums=[4,5,6,7,0,1,2], target=0 → Output: 4", "constraints": "1 <= nums.length <= 5000"},
+    26: {"title": "Combination Sum", "difficulty": "Medium", "description": "Find combinations that sum to target.", "examples": "Input: candidates=[2,3,6,7], target=7 → Output: [[2,2,3],[7]]", "constraints": "1 <= candidates.length <= 30"},
+    27: {"title": "Permutations", "difficulty": "Medium", "description": "Generate all permutations.", "examples": "Input: [1,2,3] → Output: all permutations", "constraints": "1 <= nums.length <= 6"},
+    28: {"title": "Rotate Image", "difficulty": "Medium", "description": "Rotate matrix 90 degrees.", "examples": "Input: [[1,2,3],[4,5,6],[7,8,9]] → Output: rotated", "constraints": "1 <= n <= 20"},
+    29: {"title": "Spiral Matrix", "difficulty": "Medium", "description": "Return spiral order of matrix.", "examples": "Input: [[1,2,3],[4,5,6],[7,8,9]] → Output: [1,2,3,6,9,8,7,4,5]", "constraints": "m, n >= 1"},
+    30: {"title": "Jump Game", "difficulty": "Medium", "description": "Can reach last index?", "examples": "Input: [2,3,1,1,4] → Output: true", "constraints": "1 <= nums.length <= 10^4"},
+    31: {"title": "Merge Intervals", "difficulty": "Medium", "description": "Merge overlapping intervals.", "examples": "Input: [[1,3],[2,6],[8,10],[15,18]] → Output: [[1,6],[8,10],[15,18]]", "constraints": "1 <= intervals.length <= 10^4"},
+    32: {"title": "Unique Paths", "difficulty": "Medium", "description": "Count unique paths in grid.", "examples": "Input: m=3, n=7 → Output: 28", "constraints": "1 <= m, n <= 100"},
+    33: {"title": "Word Search", "difficulty": "Medium", "description": "Find word in grid.", "examples": "Input: board=[[...]], word='ABCCED' → Output: true", "constraints": "m, n <= 6"},
+    34: {"title": "Decode Ways", "difficulty": "Medium", "description": "Count ways to decode message.", "examples": "Input: '226' → Output: 3", "constraints": "1 <= s.length <= 100"},
+    35: {"title": "Validate BST", "difficulty": "Medium", "description": "Validate binary search tree.", "examples": "Input: root → Output: true/false", "constraints": "Node count <= 10^4"},
+    36: {"title": "Level Order Traversal", "difficulty": "Medium", "description": "Binary tree level order.", "examples": "Input: [3,9,20,null,null,15,7] → Output: [[3],[9,20],[15,7]]", "constraints": "Node count <= 2000"},
+    37: {"title": "Number of Islands", "difficulty": "Medium", "description": "Count islands in grid.", "examples": "Input: grid of 1s and 0s → Output: island count", "constraints": "m, n <= 300"},
+    38: {"title": "Coin Change", "difficulty": "Medium", "description": "Minimum coins for amount.", "examples": "Input: coins=[1,2,5], amount=11 → Output: 3", "constraints": "1 <= coins.length <= 12"},
+    39: {"title": "House Robber", "difficulty": "Medium", "description": "Max robbery without adjacent.", "examples": "Input: [1,2,3,1] → Output: 4", "constraints": "1 <= nums.length <= 100"},
+    40: {"title": "Top K Frequent", "difficulty": "Medium", "description": "Top K frequent elements.", "examples": "Input: [1,1,1,2,2,3], k=2 → Output: [1,2]", "constraints": "1 <= nums.length <= 10^5"},
+    41: {"title": "Median of Two Arrays", "difficulty": "Hard", "description": "Find median of two sorted arrays.", "examples": "Input: nums1=[1,3], nums2=[2] → Output: 2.0", "constraints": "0 <= m, n <= 1000"},
+    42: {"title": "Merge k Sorted Lists", "difficulty": "Hard", "description": "Merge k sorted linked lists.", "examples": "Input: lists=[[1,4,5],[1,3,4],[2,6]] → Output: [1,1,2,3,4,4,5,6]", "constraints": "k <= 10^4"},
+    43: {"title": "Regular Expression", "difficulty": "Hard", "description": "Regex matching with '.' and '*'.", "examples": "Input: s='aa', p='a*' → Output: true", "constraints": "1 <= s.length <= 20"},
+    44: {"title": "Trapping Rain Water", "difficulty": "Hard", "description": "Trapped rainwater calculation.", "examples": "Input: [0,1,0,2,1,0,1,3,2,1,2,1] → Output: 6", "constraints": "1 <= n <= 2*10^4"},
+    45: {"title": "N-Queens", "difficulty": "Hard", "description": "Place N queens on board.", "examples": "Input: n=4 → Output: solutions", "constraints": "1 <= n <= 9"},
+    46: {"title": "Wildcard Matching", "difficulty": "Hard", "description": "Wildcard pattern matching.", "examples": "Input: s='aa', p='*' → Output: true", "constraints": "0 <= s.length <= 2000"},
+    47: {"title": "Maximal Rectangle", "difficulty": "Hard", "description": "Largest rectangle in binary matrix.", "examples": "Input: matrix of 0/1 → Output: max area", "constraints": "rows, cols <= 200"},
+    48: {"title": "Binary Tree Max Path", "difficulty": "Hard", "description": "Maximum path sum in tree.", "examples": "Input: root → Output: max sum", "constraints": "Node count <= 3*10^4"},
+    49: {"title": "Serialize Deserialize", "difficulty": "Hard", "description": "Serialize/deserialize binary tree.", "examples": "Input: root → Output: serialized string", "constraints": "Node count <= 10^4"},
+    50: {"title": "Longest Valid Parens", "difficulty": "Hard", "description": "Longest valid parentheses.", "examples": "Input: '(()' → Output: 2", "constraints": "0 <= s.length <= 3*10^4"},
+    51: {"title": "Edit Distance", "difficulty": "Hard", "description": "Minimum edit operations.", "examples": "Input: word1='horse', word2='ros' → Output: 3", "constraints": "0 <= word1.length <= 500"},
+    52: {"title": "Jump Game II", "difficulty": "Hard", "description": "Minimum jumps to end.", "examples": "Input: [2,3,1,1,4] → Output: 2", "constraints": "1 <= nums.length <= 10^4"},
+    53: {"title": "Largest Rectangle", "difficulty": "Hard", "description": "Largest rectangle in histogram.", "examples": "Input: [2,1,5,6,2,3] → Output: 10", "constraints": "1 <= heights.length <= 10^5"},
+    54: {"title": "Sliding Window Max", "difficulty": "Hard", "description": "Maximum in sliding window.", "examples": "Input: [1,3,-1,-3,5,3,6,7], k=3 → Output: [3,3,5,5,6,7]", "constraints": "1 <= nums.length <= 10^5"},
+    55: {"title": "Minimum Window", "difficulty": "Hard", "description": "Minimum window substring.", "examples": "Input: s='ADOBECODEBANC', t='ABC' → Output: 'BANC'", "constraints": "1 <= s.length <= 10^5"},
+    56: {"title": "Alien Dictionary", "difficulty": "Hard", "description": "Order of alien alphabet.", "examples": "Input: ['wrt','wrf','er','ett','rftt'] → Output: 'wertf'", "constraints": "1 <= words.length <= 100"},
+    57: {"title": "Palindrome Pairs", "difficulty": "Hard", "description": "Find palindrome pairs.", "examples": "Input: ['abcd','dcba','lls','s'] → Output: pairs", "constraints": "1 <= words.length <= 5000"},
+    58: {"title": "Maximum Gap", "difficulty": "Hard", "description": "Maximum gap in array.", "examples": "Input: [3,6,9,1] → Output: 3", "constraints": "1 <= nums.length <= 10^5"},
+    59: {"title": "Reverse Nodes in k-Group", "difficulty": "Hard", "description": "Reverse nodes in k-group.", "examples": "Input: head=[1,2,3,4,5], k=2 → Output: [2,1,4,3,5]", "constraints": "Node count <= 5000"},
+    60: {"title": "Sudoku Solver", "difficulty": "Hard", "description": "Solve Sudoku puzzle.", "examples": "Input: 9x9 board → Output: solved board", "constraints": "board.length == 9"},
+    61: {"title": "First Missing Positive", "difficulty": "Hard", "description": "Smallest missing positive.", "examples": "Input: [3,4,-1,1] → Output: 2", "constraints": "1 <= nums.length <= 10^5"},
+    62: {"title": "Longest Consecutive", "difficulty": "Hard", "description": "Longest consecutive sequence.", "examples": "Input: [100,4,200,1,3,2] → Output: 4", "constraints": "0 <= nums.length <= 10^5"},
+    63: {"title": "Word Ladder II", "difficulty": "Hard", "description": "Shortest transformation sequences.", "examples": "Input: begin='hit', end='cog' → Output: paths", "constraints": "1 <= wordList.length <= 500"},
+    64: {"title": "Find Median Stream", "difficulty": "Hard", "description": "Median from data stream.", "examples": "Add numbers → get median", "constraints": "0 <= num <= 10^5"},
+    65: {"title": "Max Frequency Stack", "difficulty": "Hard", "description": "FreqStack implementation.", "examples": "Push/pop operations", "constraints": "0 <= val <= 10^9"},
+    66: {"title": "Shortest Palindrome", "difficulty": "Hard", "description": "Make string palindrome.", "examples": "Input: 'aacecaaa' → Output: 'aaacecaaa'", "constraints": "0 <= s.length <= 5*10^4"},
+    67: {"title": "Max Points on Line", "difficulty": "Hard", "description": "Max points on same line.", "examples": "Input: [[1,1],[2,2],[3,3]] → Output: 3", "constraints": "1 <= points.length <= 300"},
+    68: {"title": "Russian Doll Envelopes", "difficulty": "Hard", "description": "Max number of envelopes.", "examples": "Input: [[5,4],[6,4],[6,7],[2,3]] → Output: 3", "constraints": "1 <= envelopes.length <= 10^5"},
+    69: {"title": "Number of Digit One", "difficulty": "Hard", "description": "Count digit 1 occurrences.", "examples": "Input: n=13 → Output: 6", "constraints": "0 <= n <= 10^9"},
+    70: {"title": "Basic Calculator", "difficulty": "Hard", "description": "Evaluate expression.", "examples": "Input: '1 + 1' → Output: 2", "constraints": "1 <= s.length <= 3*10^5"},
+    71: {"title": "Max Sliding Window", "difficulty": "Hard", "description": "Sliding window maximum.", "examples": "Input: [1,3,-1,-3,5,3,6,7], k=3 → Output: [3,3,5,5,6,7]", "constraints": "1 <= nums.length <= 10^5"},
+    72: {"title": "Serialize BST", "difficulty": "Hard", "description": "Serialize/deserialize BST.", "examples": "BST to string and back", "constraints": "Node count <= 10^4"},
+    73: {"title": "Reconstruct Itinerary", "difficulty": "Hard", "description": "Reconstruct flight path.", "examples": "Input: tickets → Output: itinerary", "constraints": "1 <= tickets.length <= 300"},
+    74: {"title": "Min Cost to Connect", "difficulty": "Hard", "description": "Connect all points min cost.", "examples": "Input: [[0,0],[2,2],[3,10],[5,2],[7,0]] → Output: 20", "constraints": "1 <= points.length <= 1000"},
+    75: {"title": "Maximum Product", "difficulty": "Hard", "description": "Maximum product subarray.", "examples": "Input: [2,3,-2,4] → Output: 6", "constraints": "1 <= nums.length <= 2*10^4"},
+    76: {"title": "House Robber III", "difficulty": "Hard", "description": "Binary tree robbery.", "examples": "Input: root → Output: max amount", "constraints": "Node count <= 10^4"},
+    77: {"title": "Count of Smaller", "difficulty": "Hard", "description": "Count smaller after self.", "examples": "Input: [5,2,6,1] → Output: [2,1,1,0]", "constraints": "1 <= nums.length <= 10^5"},
+    78: {"title": "Remove Invalid Parens", "difficulty": "Hard", "description": "Remove invalid parentheses.", "examples": "Input: '()())()' → Output: ['()()()', '(())()']", "constraints": "1 <= s.length <= 25"},
+    79: {"title": "Longest Increasing Path", "difficulty": "Hard", "description": "Longest increasing path in matrix.", "examples": "Input: matrix → Output: length", "constraints": "m, n <= 200"},
+    80: {"title": "Palindrome Partitioning", "difficulty": "Hard", "description": "Partition palindrome substrings.", "examples": "Input: 'aab' → Output: [['a','a','b'],['aa','b']]", "constraints": "1 <= s.length <= 16"},
+    81: {"title": "Scramble String", "difficulty": "Hard", "description": "Check scramble strings.", "examples": "Input: s1='great', s2='rgeat' → Output: true", "constraints": "1 <= s1.length <= 30"},
+    82: {"title": "Largest Divisible Set", "difficulty": "Hard", "description": "Largest divisible subset.", "examples": "Input: [1,2,3] → Output: [1,2] or [1,3]", "constraints": "1 <= nums.length <= 1000"},
+    83: {"title": "Strange Printer", "difficulty": "Hard", "description": "Minimum turns to print.", "examples": "Input: 'aaabbb' → Output: 2", "constraints": "1 <= s.length <= 100"},
+    84: {"title": "Super Egg Drop", "difficulty": "Hard", "description": "Egg drop problem.", "examples": "Input: k=1, n=2 → Output: 2", "constraints": "1 <= k <= 100, 1 <= n <= 10^4"},
+    85: {"title": "Burst Balloons", "difficulty": "Hard", "description": "Max coins from balloons.", "examples": "Input: [3,1,5,8] → Output: 167", "constraints": "1 <= n <= 300"},
+    86: {"title": "Minimum Difficulty", "difficulty": "Hard", "description": "Job schedule difficulty.", "examples": "Input: [6,5,4,3,2,1], d=2 → Output: 7", "constraints": "1 <= jobDifficulty.length <= 300"},
+    87: {"title": "Max Value of Equation", "difficulty": "Hard", "description": "Max yi+yj+|xi-xj|.", "examples": "Input: points=[[1,3],[2,0],[5,10],[6,-10]], k=1 → Output: 4", "constraints": "2 <= points.length <= 10^5"},
+    88: {"title": "Minimum Distance", "difficulty": "Hard", "description": "Min distance to type word.", "examples": "Input: word='CAKE' → Output: 3", "constraints": "1 <= word.length <= 100"},
+    89: {"title": "Minimum Skips", "difficulty": "Hard", "description": "Min skips to arrive on time.", "examples": "Input: dist=[1,3,2], speed=4, hoursBefore=2 → Output: 1", "constraints": "1 <= n <= 1000"},
+    90: {"title": "Max Score Words", "difficulty": "Hard", "description": "Maximum score from words.", "examples": "Input: words, letters, score → Output: max", "constraints": "1 <= words.length <= 14"},
+    91: {"title": "Minimum Cost Tree", "difficulty": "Hard", "description": "Min cost to merge stones.", "examples": "Input: stones=[3,2,4,1], k=2 → Output: 20", "constraints": "1 <= stones.length <= 30"},
+    92: {"title": "Count Ways to Build", "difficulty": "Hard", "description": "Ways to build rooms.", "examples": "Input: prevRoom=[-1,0,1] → Output: ways", "constraints": "1 <= n <= 10^5"},
+    93: {"title": "Maximum Performance", "difficulty": "Hard", "description": "Max performance of team.", "examples": "Input: n=6, speed=[2,10,3,1,5,8], efficiency=[5,4,3,9,7,2], k=2 → Output: 60", "constraints": "1 <= k <= n <= 10^5"},
+    94: {"title": "Minimum Number of Taps", "difficulty": "Hard", "description": "Min taps to water garden.", "examples": "Input: n=5, ranges=[3,4,1,1,0,0] → Output: 1", "constraints": "1 <= n <= 10^4"},
+    95: {"title": "Max Profit with K", "difficulty": "Hard", "description": "Max profit with K transactions.", "examples": "Input: k=2, prices=[2,4,1] → Output: 2", "constraints": "0 <= k <= 100"},
+    96: {"title": "Race Car", "difficulty": "Hard", "description": "Minimum instructions to reach target.", "examples": "Input: target=3 → Output: 2", "constraints": "1 <= target <= 10^4"},
+    97: {"title": "Minimum Window Subsequence", "difficulty": "Hard", "description": "Min window containing subsequence.", "examples": "Input: s='abcdebdde', t='bde' → Output: 'bcde'", "constraints": "1 <= s.length <= 2*10^4"},
+    98: {"title": "Maximum Vacation Days", "difficulty": "Hard", "description": "Max vacation days.", "examples": "Input: flights, days → Output: max", "constraints": "n == flights.length"},
+    99: {"title": "Minimum Difficulty of Job", "difficulty": "Hard", "description": "Min difficulty job schedule.", "examples": "Input: [6,5,4,3,2,1], d=2 → Output: 7", "constraints": "1 <= jobDifficulty.length <= 300"},
+    100: {"title": "Student Attendance II", "difficulty": "Hard", "description": "Rewardable attendance records.", "examples": "Input: n=2 → Output: 8", "constraints": "1 <= n <= 10^5"}
+} 
+
+
+# ========== CODE RUNNER ==========
+def run_code(code, user_input=""):
+    """Execute Python code and return output"""
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+            f.write(code)
+            temp_file = f.name
+        
+        result = subprocess.run(
+            ['python', temp_file],
+            input=user_input,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        os.unlink(temp_file)
+        return result.stdout, result.stderr
+        
+    except subprocess.TimeoutExpired:
+        return "", "Error: Code execution timed out (10 seconds limit)"
+    except FileNotFoundError:
+        return "", "Error: Python not found. Please make sure Python is installed."
+    except Exception as e:
+        return "", f"Error: {str(e)}"
+
+# ========== ROUTES ==========
 
 @app.route('/')
-def home():
+def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
-    
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        if not email or not password:
-            flash('Email and password are required!', 'error')
-            return redirect(url_for('login'))
-        
-        db = get_db()
-        user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-        db.close()
-        
-        if user and user['password'] == hash_password(password):
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['email'] = user['email']
-            flash(f'Welcome back, {user["username"]}! 🎉', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password!', 'error')
-            return redirect(url_for('login'))
-    
-    return render_template('login.html')
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
-    
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
         
-        if not username or not email or not password:
-            flash('All fields are required!', 'error')
-            return redirect(url_for('signup'))
-        
+        if not username or len(username) < 3:
+            return render_template('signup.html', error="Username must be at least 3 characters")
+        if not email or '@' not in email:
+            return render_template('signup.html', error="Valid email required")
+        if not password or len(password) < 4:
+            return render_template('signup.html', error="Password must be at least 4 characters")
         if password != confirm_password:
-            flash('Passwords do not match!', 'error')
-            return redirect(url_for('signup'))
+            return render_template('signup.html', error="Passwords do not match")
         
-        if len(password) < 6:
-            flash('Password must be at least 6 characters!', 'error')
-            return redirect(url_for('signup'))
+        hashed_password = hash_password(password)
+        conn = get_db()
+        cursor = conn.cursor()
         
-        db = get_db()
-        
-        existing = db.execute('SELECT * FROM users WHERE email = ? OR username = ?', 
-                             (email, username)).fetchone()
-        
-        if existing:
-            flash('Username or email already exists!', 'error')
-            db.close()
-            return redirect(url_for('signup'))
-        
-        hashed_pw = hash_password(password)
-        now = datetime.now().isoformat()
-        
-        db.execute('INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, ?)',
-                  (username, email, hashed_pw, now))
-        db.commit()
-        db.close()
-        
-        flash('✅ Account created successfully! Please login.', 'success')
-        return redirect(url_for('login'))
+        try:
+            cursor.execute("INSERT INTO users (username, email, password, solved_problems, submissions) VALUES (?, ?, ?, ?, ?)",
+                         (username, email, hashed_password, '[]', 0))
+            conn.commit()
+            conn.close()
+            flash("Account created! Please login.", "success")
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            conn.close()
+            return render_template('signup.html', error="Username or email already exists")
     
     return render_template('signup.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        
+        hashed_password = hash_password(password)
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, hashed_password))
+        user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            return redirect(url_for('dashboard'))
+        else:
+            return render_template('login.html', error="Invalid email or password")
+    
+    return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
-        flash('Please login first!', 'error')
         return redirect(url_for('login'))
     
-    db = get_db()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT solved_problems, submissions FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    conn.close()
     
-    total_codes = db.execute('SELECT COUNT(*) as count FROM submissions WHERE user_id = ?',
-                            (session['user_id'],)).fetchone()
+    solved = eval(user['solved_problems']) if user['solved_problems'] else []
+    solved_count = len(solved)
+    completion = (solved_count / 100) * 100
     
-    solved_problems = db.execute('SELECT COUNT(DISTINCT problem_id) as count FROM submissions WHERE user_id = ? AND status = "success"',
-                                (session['user_id'],)).fetchone()
-    
-    recent_submissions = db.execute('''SELECT * FROM submissions 
-                                       WHERE user_id = ? 
-                                       ORDER BY submitted_at DESC LIMIT 5''',
-                                     (session['user_id'],)).fetchall()
-    
-    db.close()
-    
-    return render_template('dashboard.html', 
+    return render_template('dashboard.html',
                          username=session['username'],
-                         total_codes=total_codes['count'] if total_codes else 0,
-                         solved_problems=solved_problems['count'] if solved_problems else 0,
-                         total_problems=len(PROBLEMS),
-                         recent_submissions=recent_submissions)
+                         solved_count=solved_count,
+                         completion=round(completion),
+                         submissions=user['submissions'])
 
 @app.route('/problems')
-def problems_list():
+def problems():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    db = get_db()
-    solved = db.execute('SELECT DISTINCT problem_id FROM submissions WHERE user_id = ? AND status = "success"',
-                       (session['user_id'],)).fetchall()
-    solved_ids = [s['problem_id'] for s in solved]
-    db.close()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT solved_problems FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    conn.close()
     
-    return render_template('problems.html', 
-                         problems=PROBLEMS,
-                         solved_ids=solved_ids,
-                         username=session.get('username'))
+    solved = eval(user['solved_problems']) if user['solved_problems'] else []
+    
+    return render_template('problems.html', problems=PROBLEMS, solved=solved, username=session['username'])
 
-@app.route('/code')
-def code():
+@app.route('/solve/<int:problem_id>')
+def solve(problem_id):
     if 'user_id' not in session:
-        flash('Please login first!', 'error')
         return redirect(url_for('login'))
-    
-    problem_id = request.args.get('problem_id', 1)
-    try:
-        problem_id = int(problem_id)
-    except:
-        problem_id = 1
     
     if problem_id not in PROBLEMS:
-        problem_id = 1
+        return "Problem not found", 404
     
-    session['current_problem'] = problem_id
-    problem = PROBLEMS[problem_id]
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT solved_problems FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    conn.close()
     
-    return render_template('code.html', 
-                         username=session.get('username'),
-                         problem=problem,
-                         total_problems=len(PROBLEMS))
+    solved = eval(user['solved_problems']) if user['solved_problems'] else []
+    already_solved = problem_id in solved
+    
+    return render_template('solve.html', 
+                         problem=PROBLEMS[problem_id],
+                         problem_id=problem_id,
+                         already_solved=already_solved,
+                         username=session['username'])
 
-@app.route('/continue_coding')
-def continue_coding():
+@app.route('/api/run_code', methods=['POST'])
+def api_run_code():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return jsonify({"error": "Not logged in"}), 401
     
-    db = get_db()
+    data = request.get_json()
+    code = data.get('code', '')
+    user_input = data.get('input', '')
     
-    # Get all solved problem IDs
-    solved = db.execute('SELECT DISTINCT problem_id FROM submissions WHERE user_id = ? AND status = "success"',
-                       (session['user_id'],)).fetchall()
-    solved_ids = [s['problem_id'] for s in solved]
+    output, error = run_code(code, user_input)
     
-    db.close()
-    
-    # Find the next unsolved problem (lowest ID not in solved_ids)
-    next_problem = 1
-    for i in range(1, len(PROBLEMS) + 1):
-        if i not in solved_ids:
-            next_problem = i
-            break
-    
-    return redirect(url_for('code', problem_id=next_problem))
+    return jsonify({
+        "success": True,
+        "output": output,
+        "error": error,
+        "has_error": bool(error)
+    })
 
-@app.route('/submit_code', methods=['POST'])
-def submit_code():
+@app.route('/submit_solution', methods=['POST'])
+def submit_solution():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return jsonify({"error": "Not logged in"}), 401
     
-    code_content = request.form.get('code')
-    language = request.form.get('language')
-    problem_id = int(request.form.get('problem_id', 1))
+    data = request.get_json()
+    problem_id = data.get('problem_id')
+    code = data.get('code')
     
-    # Auto-evaluate the solution
-    status = evaluate_solution(problem_id, code_content, language)
+    if not code or len(code.strip()) < 20:
+        return jsonify({"error": "Code too short"}), 400
     
-    db = get_db()
-    db.execute('''INSERT INTO submissions (user_id, problem_id, code, language, status, submitted_at)
-                  VALUES (?, ?, ?, ?, ?, ?)''',
-               (session['user_id'], problem_id, code_content, language, status, datetime.now().isoformat()))
-    db.commit()
-    db.close()
+    conn = get_db()
+    cursor = conn.cursor()
     
-    if status == 'success':
-        flash(f'✅ Problem {problem_id} solved successfully! Great job! 🎉', 'success')
-    else:
-        flash('💪 Code submitted! Keep practicing!', 'info')
+    cursor.execute("INSERT INTO submissions (user_id, problem_id, code) VALUES (?, ?, ?)",
+                  (session['user_id'], problem_id, code))
     
-    return redirect(url_for('problems_list'))
-
-def evaluate_solution(problem_id, code, language):
-    """Auto-evaluate if the solution is correct"""
+    cursor.execute("SELECT solved_problems, submissions FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
     
-    # Check if code has actual implementation
-    if 'pass' in code and len(code) < 100:
-        return 'failed'
+    solved = eval(user['solved_problems']) if user['solved_problems'] else []
     
-    if 'TODO' in code or 'todo' in code:
-        return 'failed'
+    if problem_id not in solved:
+        solved.append(problem_id)
+        cursor.execute("UPDATE users SET solved_problems = ?, submissions = ? WHERE id = ?",
+                      (str(solved), user['submissions'] + 1, session['user_id']))
     
-    # Problem-specific checks
-    if problem_id == 1:  # Two Sum
-        if 'for' in code and 'return' in code:
-            if 'nums' in code and 'target' in code:
-                return 'success'
+    conn.commit()
+    conn.close()
     
-    elif problem_id == 2:  # Palindrome Number
-        if ('str' in code or 'while' in code) and 'return' in code:
-            return 'success'
-    
-    elif problem_id == 3:  # Valid Parentheses
-        if ('stack' in code or 'list' in code) and 'return' in code:
-            return 'success'
-    
-    elif problem_id == 4:  # Reverse Integer
-        if 'return' in code and ('int' in code or 'str' in code):
-            return 'success'
-    
-    # General check
-    if 'return' in code and len(code) > 50:
-        if 'def ' in code or 'function' in code:
-            return 'success'
-    
-    return 'pending'
-
-@app.route('/review/<int:problem_id>')
-def review(problem_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    db = get_db()
-    submission = db.execute('''SELECT * FROM submissions 
-                               WHERE user_id = ? AND problem_id = ? 
-                               ORDER BY submitted_at DESC LIMIT 1''',
-                            (session['user_id'], problem_id)).fetchone()
-    db.close()
-    
-    problem = PROBLEMS.get(problem_id, PROBLEMS[1])
-    
-    return render_template('review.html', 
-                         username=session.get('username'),
-                         problem=problem,
-                         submission=submission)
+    return jsonify({"success": True, "message": "Solution submitted!"})
 
 @app.route('/leaderboard')
 def leaderboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    db = get_db()
-    leaders = db.execute('''SELECT users.username, COUNT(DISTINCT submissions.problem_id) as solved_count
-                           FROM submissions 
-                           JOIN users ON submissions.user_id = users.id
-                           WHERE submissions.status = 'success'
-                           GROUP BY users.id
-                           ORDER BY solved_count DESC
-                           LIMIT 20''').fetchall()
-    db.close()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT username, solved_problems, submissions FROM users")
+    users = cursor.fetchall()
+    conn.close()
     
-    return render_template('leaderboard.html', leaders=leaders, username=session.get('username'))
+    leaderboard_data = []
+    for user in users:
+        solved = eval(user['solved_problems']) if user['solved_problems'] else []
+        leaderboard_data.append({
+            'username': user['username'],
+            'solved': len(solved),
+            'submissions': user['submissions']
+        })
+    
+    leaderboard_data.sort(key=lambda x: (-x['solved'], x['submissions']))
+    
+    return render_template('leaderboard.html', 
+                         leaderboard=leaderboard_data,
+                         username=session['username'],
+                         now=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 @app.route('/progress')
 def progress():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    db = get_db()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT solved_problems FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    conn.close()
     
-    solved = db.execute('SELECT DISTINCT problem_id FROM submissions WHERE user_id = ? AND status = "success"',
-                       (session['user_id'],)).fetchall()
-    solved_count = len(solved)
+    solved_ids = eval(user['solved_problems']) if user['solved_problems'] else []
     
-    # Get difficulty breakdown
-    easy_solved = 0
-    medium_solved = 0
-    hard_solved = 0
-    solved_problems_list = []
+    solved_list = []
+    for pid in solved_ids:
+        problem = PROBLEMS.get(pid, {})
+        solved_list.append({
+            'id': pid,
+            'title': problem.get('title', f'Problem {pid}'),
+            'difficulty': problem.get('difficulty', 'Unknown')
+        })
     
-    for s in solved:
-        problem = PROBLEMS.get(s['problem_id'])
-        if problem:
-            solved_problems_list.append({
-                'id': s['problem_id'],
-                'title': problem['title'],
-                'difficulty': problem['difficulty']
-            })
-            if problem['difficulty'] == 'Easy':
-                easy_solved += 1
-            elif problem['difficulty'] == 'Medium':
-                medium_solved += 1
-            else:
-                hard_solved += 1
+    easy_solved = sum(1 for pid in solved_ids if PROBLEMS.get(pid, {}).get('difficulty') == 'Easy')
+    medium_solved = sum(1 for pid in solved_ids if PROBLEMS.get(pid, {}).get('difficulty') == 'Medium')
+    hard_solved = sum(1 for pid in solved_ids if PROBLEMS.get(pid, {}).get('difficulty') == 'Hard')
     
-    db.close()
+    easy_total = sum(1 for p in PROBLEMS.values() if p['difficulty'] == 'Easy')
+    medium_total = sum(1 for p in PROBLEMS.values() if p['difficulty'] == 'Medium')
+    hard_total = sum(1 for p in PROBLEMS.values() if p['difficulty'] == 'Hard')
     
-    return render_template('progress.html', 
-                         solved_problems=solved_count,
-                         total_problems=len(PROBLEMS),
+    return render_template('progress.html',
+                         username=session['username'],
+                         solved_count=len(solved_ids),
+                         solved_list=solved_list,
                          easy_solved=easy_solved,
+                         easy_total=easy_total,
                          medium_solved=medium_solved,
+                         medium_total=medium_total,
                          hard_solved=hard_solved,
-                         solved_problems_list=solved_problems_list,
-                         username=session.get('username'))
+                         hard_total=hard_total)
 
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('You have been logged out. See you soon! 👋', 'info')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

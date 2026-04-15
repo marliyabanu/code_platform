@@ -1,9 +1,204 @@
-<link rel="stylesheet" href="/static/style.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Platform - Submission Result</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Fira Code', monospace;
+        }
 
-<div class="container">
-<h2>Result</h2>
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #020409);
+            min-height: 100vh;
+        }
 
-<pre>{{output}}</pre>
+        .navbar {
+            background: rgba(10, 20, 35, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-<a href="/dashboard">Back</a>
-</div>
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fff, #3bc9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links a {
+            color: #b0c4ff;
+            text-decoration: none;
+            margin-left: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .result-card {
+            background: rgba(15, 25, 45, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(72, 187, 255, 0.3);
+            padding: 2rem;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .status-accepted {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            color: #10b981;
+        }
+
+        .info-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+        }
+
+        .info-label {
+            color: #3bc9ff;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #cbd5e6;
+            font-family: monospace;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .code-block {
+            background: #0a0f1e;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            color: #b9ffb9;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(139, 92, 246, 0.8);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">⌨️ Code Platform</div>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/problems">Problems</a>
+            <a href="/progress">Progress</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="result-card">
+            <div class="result-header">
+                <h1 style="color: white;">📝 Submission Result</h1>
+                <div class="status-badge status-{{ submission.status }}">
+                    ✅ {{ submission.status|upper }}
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">📌 Problem</div>
+                <div class="info-value">{{ submission.title }}</div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">⭐ Difficulty</div>
+                <div class="info-value">{{ submission.difficulty }}</div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">📖 Description</div>
+                <div class="info-value">{{ submission.description }}</div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">✅ Result</div>
+                <div class="info-value">{{ submission.result or 'All test cases passed!' }}</div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">💻 Your Code</div>
+                <div class="code-block">
+                    <pre>{{ submission.code }}</pre>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-label">🕐 Submitted At</div>
+                <div class="info-value">{{ submission.submitted_at }}</div>
+            </div>
+
+            <div class="actions">
+                <a href="/progress" class="btn btn-primary">← Back to Progress</a>
+                <a href="/review/{{ submission.id }}" class="btn btn-secondary">✍️ Write a Review</a>
+                <a href="/problems" class="btn btn-primary">Browse More Problems →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

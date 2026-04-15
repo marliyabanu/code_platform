@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Problem - CodePlatform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Fira Code', monospace;
+        }
+        body {
+            background: #f5f5f5;
+            transition: background 0.3s ease;
+        }
+        body.dark {
+            background: #0a0f1e;
+        }
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        body.dark .navbar {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000;
+        }
+        body.dark .logo {
+            color: #3bc9ff;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+        }
+        body.dark .nav-links a {
+            color: #b0c4ff;
+        }
+        .logout-btn {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+        body.dark .logout-btn {
+            background: #ef4444;
+            color: white;
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .problem-card, .code-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        body.dark .problem-card, body.dark .code-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .problem-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+        body.dark .problem-title {
+            color: white;
+        }
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+        }
+        .Easy { background: #d1fae5; color: #065f46; }
+        .Medium { background: #fed7aa; color: #92400e; }
+        .Hard { background: #fee2e2; color: #991b1b; }
+        body.dark .Easy { background: #064e3b; color: #34d399; }
+        body.dark .Medium { background: #92400e; color: #fbbf24; }
+        body.dark .Hard { background: #7f1d1d; color: #f87171; }
+        .problem-description {
+            color: #4b5563;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+        body.dark .problem-description {
+            color: #cbd5e6;
+        }
+        .examples-section, .constraints {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        body.dark .examples-section, body.dark .constraints {
+            background: #0f172a;
+        }
+        .code-editor {
+            width: 100%;
+            min-height: 350px;
+            background: #1e1e2e;
+            color: #b9ffb9;
+            font-family: monospace;
+            font-size: 0.85rem;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            resize: vertical;
+        }
+        .input-area {
+            margin: 1rem 0;
+        }
+        .input-area label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            resize: vertical;
+        }
+        body.dark .input-field {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .run-btn, .submit-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .run-btn {
+            background: #6b7280;
+            color: white;
+        }
+        .submit-btn {
+            background: #000;
+            color: white;
+        }
+        body.dark .submit-btn {
+            background: #10b981;
+        }
+        .output-content {
+            background: #1e1e2e;
+            color: #b9ffb9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .error-msg {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .success-msg {
+            background: rgba(16, 185, 129, 0.2);
+            color: #059669;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #000;
+            text-decoration: none;
+        }
+        body.dark .back-link {
+            color: #3bc9ff;
+        }
+        pre {
+            white-space: pre-wrap;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">⌨️ CodePlatform</div>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/problems">Problems</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="/progress">Progress</a>
+            <button class="theme-toggle" id="themeBtn">🌙</button>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="problem-card">
+            <h1 class="problem-title">{{ problem_id }}. {{ problem.title }}</h1>
+            <span class="difficulty-badge {{ problem.difficulty }}">{{ problem.difficulty }}</span>
+            <div class="problem-description">{{ problem.description }}</div>
+            <div class="examples-section"><strong>📝 Example:</strong><br>Input: {{ problem.examples.split('→')[0] if '→' in problem.examples else problem.examples }}<br>Output: {{ problem.examples.split('→')[1] if '→' in problem.examples else '' }}</div>
+            <div class="constraints"><strong>⚡ Constraints:</strong><br>{{ problem.constraints if problem.constraints else "Standard constraints apply" }}</div>
+            {% if already_solved %}<div class="success-msg" style="margin-top:1rem;">✅ You have already solved this problem!</div>{% endif %}
+        </div>
+
+        <div class="code-card">
+            <h3>✍️ Your Solution (Python)</h3>
+            <textarea id="codeEditor" class="code-editor" placeholder="Write your Python solution here..."></textarea>
+            <div class="input-area">
+                <label>📥 Custom Input:</label>
+                <textarea id="userInput" class="input-field" rows="3" placeholder="Enter your input here..."></textarea>
+            </div>
+            <div class="action-buttons">
+                <button class="run-btn" id="runBtn">▶️ Run Code</button>
+                <button class="submit-btn" id="submitBtn" {% if already_solved %}disabled{% endif %}>✅ Submit Solution</button>
+            </div>
+            <div id="outputArea" class="output-content">> Ready to run your code...</div>
+            <a href="/problems" class="back-link">← Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        // Simple working template with proper print statements
+        const pythonTemplate = `# ====== YOUR SOLUTION GOES HERE ======
+def min_window(s, t):
+    if not s or not t:
+        return ""
+    
+    dict_t = {}
+    for char in t:
+        dict_t[char] = dict_t.get(char, 0) + 1
+    
+    required = len(dict_t)
+    l, r = 0, 0
+    formed = 0
+    window_counts = {}
+    ans = float("inf"), None, None
+    
+    while r < len(s):
+        char = s[r]
+        window_counts[char] = window_counts.get(char, 0) + 1
+        
+        if char in dict_t and window_counts[char] == dict_t[char]:
+            formed += 1
+        
+        while l <= r and formed == required:
+            char = s[l]
+            
+            if r - l + 1 < ans[0]:
+                ans = (r - l + 1, l, r)
+            
+            window_counts[char] -= 1
+            if char in dict_t and window_counts[char] < dict_t[char]:
+                formed -= 1
+            
+            l += 1
+        
+        r += 1
+    
+    return "" if ans[0] == float("inf") else s[ans[1]:ans[2] + 1]
+
+# ====== READ INPUT ======
+# IMPORTANT: Your code MUST use input() to read and print() to output
+s = input().strip()
+t = input().strip()
+
+# ====== CALL YOUR FUNCTION AND PRINT RESULT ======
+result = min_window(s, t)
+print(result)`;
+
+        let problemId = {{ problem_id }};
+        let alreadySolved = {{ 'true' if already_solved else 'false' }};
+
+        const codeEditor = document.getElementById('codeEditor');
+        const userInput = document.getElementById('userInput');
+        const outputArea = document.getElementById('outputArea');
+        const runBtn = document.getElementById('runBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const themeBtn = document.getElementById('themeBtn');
+
+        // Set initial code
+        codeEditor.value = pythonTemplate;
+
+        // Run code handler
+        runBtn.addEventListener('click', async function() {
+            let code = codeEditor.value;
+            let input = userInput.value;
+            
+            if (!code.trim()) {
+                outputArea.innerHTML = '<div class="error-msg">❌ Please write some code</div>';
+                return;
+            }
+            
+            // Check if code has print statement
+            if (!code.includes('print(') && !code.includes('print (')) {
+                outputArea.innerHTML = '<div class="error-msg">⚠️ Warning: Your code has no print() statement. Add <strong>print(result)</strong> to see output.</div>';
+            }
+            
+            outputArea.innerHTML = '<div>⏳ Running your code...</div>';
+            
+            try {
+                const response = await fetch('/api/run_code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        input: input
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.has_error || data.error) {
+                    outputArea.innerHTML = `<div class="error-msg"><strong>❌ Error:</strong><br><pre>${escapeHtml(data.error || data.output)}</pre></div>`;
+                } else {
+                    let outputText = data.output || '(No output)';
+                    
+                    // If output is empty, show helpful message
+                    if (!outputText.trim()) {
+                        outputText = '⚠️ Your code produced no output. Make sure to use print() to display your result.';
+                    }
+                    
+                    outputArea.innerHTML = `<div class="success-msg"><strong>✅ Output:</strong><br><pre>${escapeHtml(outputText)}</pre></div>`;
+                }
+            } catch (error) {
+                outputArea.innerHTML = `<div class="error-msg">❌ Network Error: ${error.message}</div>`;
+            }
+        });
+
+        // Submit solution handler
+        submitBtn.addEventListener('click', async function() {
+            if (alreadySolved) {
+                outputArea.innerHTML = '<div class="success-msg">✅ You have already solved this problem!</div>';
+                return;
+            }
+            
+            const code = codeEditor.value;
+            
+            if (!code.trim()) {
+                outputArea.innerHTML = '<div class="error-msg">❌ Please write your solution first</div>';
+                return;
+            }
+            
+            outputArea.innerHTML = '<div>⏳ Submitting...</div>';
+            
+            try {
+                const response = await fetch('/submit_solution', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        problem_id: problemId,
+                        code: code
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    outputArea.innerHTML = '<div class="success-msg">🎉 Solution submitted successfully! Redirecting...</div>';
+                    setTimeout(() => {
+                        window.location.href = '/problems';
+                    }, 1500);
+                } else {
+                    outputArea.innerHTML = `<div class="error-msg">❌ ${data.error || 'Submission failed'}</div>`;
+                }
+            } catch (error) {
+                outputArea.innerHTML = `<div class="error-msg">❌ Error: ${error.message}</div>`;
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Theme toggle
+        themeBtn.addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            this.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            themeBtn.textContent = '☀️';
+        }
+    </script>
+</body>
+</html>

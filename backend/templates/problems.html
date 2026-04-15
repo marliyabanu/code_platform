@@ -3,76 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problems - CodePlatform</title>
+    <title>CodePlatform - Problems</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
-            transition: all 0.3s ease;
+            background: #f5f5f5;
+            transition: background 0.3s ease;
         }
 
-        /* WHITE THEME (Default) */
-        body.white-theme {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #1a1a2e;
-            --text-secondary: #4a4a6a;
-            --text-muted: #6c757d;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --accent: #3b82f6;
-            --accent-green: #10b981;
-            --navbar-bg: #ffffff;
-            background: #ffffff;
-            color: #1a1a2e;
-        }
-
-        /* BLACK THEME */
-        body.black-theme {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --bg-tertiary: #2a2a2a;
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
-            --card-bg: #111111;
-            --border: #2a2a2a;
-            --accent: #60a5fa;
-            --accent-green: #4ade80;
-            --navbar-bg: #111111;
-            background: #0a0a0a;
-            color: #ffffff;
-        }
-
-        body.white-theme, body.black-theme {
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        body.dark {
+            background: #0a0f1e;
         }
 
         .navbar {
-            background: var(--navbar-bg);
-            padding: 0.75rem 2rem;
+            background: white;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e5e7eb;
             position: sticky;
             top: 0;
             z-index: 100;
-            flex-wrap: wrap;
-            gap: 1rem;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        body.dark .navbar {
+            background: rgba(15, 25, 45, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
         }
 
         .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000000;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .logo {
+            background: linear-gradient(135deg, #fff, #3bc9ff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -80,276 +56,266 @@
 
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             align-items: center;
-            flex-wrap: wrap;
         }
 
-        .nav-link {
+        .nav-links a {
+            color: #4b5563;
             text-decoration: none;
-            color: var(--text-secondary);
             font-weight: 500;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+            transition: color 0.2s;
         }
 
-        .nav-link:hover {
-            color: var(--accent);
+        body.dark .nav-links a {
+            color: #b0c4ff;
         }
 
-        .theme-toggle {
-            background: var(--bg-tertiary);
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.3s;
-            color: var(--text-primary);
+        .nav-links a:hover {
+            color: #000000;
         }
 
-        .theme-toggle:hover {
-            transform: scale(1.05);
+        body.dark .nav-links a:hover {
+            color: #3bc9ff;
         }
 
         .logout-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            font-weight: 500;
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        body.dark .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        body.dark .theme-toggle {
+            color: #fbbf24;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            color: var(--text-primary);
-        }
-
-        .stats-bar {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 2rem;
+        .problems-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
-            justify-content: space-around;
-            text-align: center;
-            border: 1px solid var(--border);
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
-        .stat {
-            text-align: center;
+        body.dark .problems-header {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
         }
 
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--accent);
+        .problems-header h2 {
+            color: #111827;
+            transition: color 0.3s ease;
         }
 
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.8rem;
+        body.dark .problems-header h2 {
+            color: white;
+        }
+
+        .stats {
+            color: #6b7280;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .stats {
+            color: #8ba3c7;
         }
 
         .problems-table {
-            background: var(--card-bg);
-            border-radius: 12px;
+            background: white;
+            border-radius: 1rem;
             overflow: hidden;
-            border: 1px solid var(--border);
+            border: 1px solid #e5e7eb;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
-        .table-header {
-            display: grid;
-            grid-template-columns: 70px 1fr 100px 100px 100px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        body.dark .problems-table {
+            background: rgba(15, 25, 45, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(72, 187, 255, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
             padding: 1rem;
+            background: #f9fafb;
+            color: #374151;
             font-weight: 600;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
         }
 
-        .problem-row {
-            display: grid;
-            grid-template-columns: 70px 1fr 100px 100px 100px;
+        body.dark th {
+            background: rgba(0, 0, 0, 0.3);
+            color: #3bc9ff;
+            border-bottom: 1px solid rgba(72, 187, 255, 0.2);
+        }
+
+        td {
             padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            transition: all 0.3s;
-            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            color: #4b5563;
+            transition: border 0.3s ease, color 0.3s ease;
         }
 
-        .problem-row:hover {
-            background: var(--bg-secondary);
+        body.dark td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e6;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        body.dark tr:hover {
+            background: rgba(59, 201, 255, 0.1);
         }
 
         .difficulty {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            text-align: center;
-            width: fit-content;
         }
+        .Easy { background: #d1fae5; color: #065f46; }
+        .Medium { background: #fed7aa; color: #92400e; }
+        .Hard { background: #fee2e2; color: #991b1b; }
 
-        .easy { background: #10b981; color: white; }
-        .medium { background: #f59e0b; color: white; }
-        .hard { background: #ef4444; color: white; }
+        body.dark .Easy { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        body.dark .Medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        body.dark .Hard { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
-        .solved-text {
-            color: var(--accent-green);
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
+        .status { font-size: 1rem; }
+        .solved { color: #059669; font-weight: 500; }
+        .unsolved { color: #9ca3af; }
 
-        .unsolved-text {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
+        body.dark .solved { color: #34d399; }
+        body.dark .unsolved { color: #6b7280; }
 
         .solve-btn {
-            background: var(--accent);
+            padding: 0.4rem 1rem;
+            background: #000000;
+            border: none;
+            border-radius: 0.5rem;
             color: white;
-            padding: 6px 16px;
-            border-radius: 20px;
             text-decoration: none;
             font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-block;
-            text-align: center;
-            width: fit-content;
+            transition: 0.2s;
+        }
+
+        body.dark .solve-btn {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
         }
 
         .solve-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
+            background: #1f2937;
         }
 
-        @media (max-width: 768px) {
-            .table-header, .problem-row {
-                grid-template-columns: 50px 1fr 80px 80px 80px;
-                font-size: 0.7rem;
-                gap: 0.3rem;
-            }
-            .container {
-                padding: 0 1rem;
-            }
-            .solve-btn {
-                padding: 4px 8px;
-                font-size: 0.65rem;
-            }
+        .solved-btn {
+            padding: 0.4rem 1rem;
+            background: #d1fae5;
+            border-radius: 0.5rem;
+            color: #065f46;
+            font-size: 0.8rem;
+            cursor: default;
+        }
+
+        body.dark .solved-btn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
         }
     </style>
 </head>
-<body class="white-theme">
+<body>
     <nav class="navbar">
-        <div class="logo">⚡ CodePlatform</div>
+        <div class="logo">⌨️ CodePlatform</div>
         <div class="nav-links">
-            <a href="/dashboard" class="nav-link">Dashboard</a>
-            <a href="/problems" class="nav-link">Problems</a>
-            <a href="/leaderboard" class="nav-link">Leaderboard</a>
-            <a href="/progress" class="nav-link">Progress</a>
-            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/problems" style="font-weight:600;">Problems</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="/progress">Progress</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
             <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <h1>📋 Coding Problems</h1>
-        
-        <div class="stats-bar">
-            <div class="stat">
-                <div class="stat-number">{{ problems|length }}</div>
-                <div class="stat-label">Total Problems</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">{{ solved_ids|length }}</div>
-                <div class="stat-label">Solved</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">{{ ((solved_ids|length / problems|length) * 100)|round|int }}%</div>
-                <div class="stat-label">Progress</div>
-            </div>
+        <div class="problems-header">
+            <h2>📋 Coding Problems</h2>
+            <div class="stats">{{ solved|length }} / 100 Problems Solved</div>
         </div>
 
         <div class="problems-table">
-            <div class="table-header">
-                <div>#</div>
-                <div>Title</div>
-                <div>Difficulty</div>
-                <div>Status</div>
-                <div>Action</div>
-            </div>
-            
-            <div id="problems-container">
-                {% for id, problem in problems.items() %}
-                <div class="problem-row">
-                    <div>{{ id }}</div>
-                    <div style="font-weight: 500;">{{ problem.title }}</div>
-                    <div>
-                        <span class="difficulty {{ problem.difficulty|lower }}">
-                            {{ problem.difficulty }}
-                        </span>
-                    </div>
-                    <div>
-                        {% if id in solved_ids %}
-                            <span class="solved-text">✅ Solved</span>
-                        {% else %}
-                            <span class="unsolved-text">⏳ Not Solved</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <a href="/code?problem_id={{ id }}" class="solve-btn">
-                            {% if id in solved_ids %}Practice{% else %}Solve{% endif %}
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Title</th><th>Difficulty</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for id, problem in problems.items() %}
+                    <tr>
+                        <td>{{ id }}</td>
+                        <td><strong>{{ problem.title }}</strong></td>
+                        <td><span class="difficulty {{ problem.difficulty }}">{{ problem.difficulty }}</span></td>
+                        <td class="status">{% if id in solved %}<span class="solved">✅ Solved</span>{% else %}<span class="unsolved">📌 Not Solved</span>{% endif %}</td>
+                        <td>{% if id in solved %}<span class="solved-btn">Completed</span>{% else %}<a href="/solve/{{ id }}" class="solve-btn">Solve →</a>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // THEME TOGGLE FUNCTION
         function toggleTheme() {
             const body = document.body;
-            const btn = document.getElementById('themeToggle');
+            const toggleBtn = document.getElementById('themeToggle');
             
-            if (body.classList.contains('white-theme')) {
-                body.classList.remove('white-theme');
-                body.classList.add('black-theme');
-                btn.innerHTML = '☀️ Light Mode';
-                localStorage.setItem('theme', 'black');
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                toggleBtn.textContent = '🌙';
             } else {
-                body.classList.remove('black-theme');
-                body.classList.add('white-theme');
-                btn.innerHTML = '🌙 Dark Mode';
-                localStorage.setItem('theme', 'white');
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                toggleBtn.textContent = '☀️';
             }
         }
 
-        // Load saved theme
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'black') {
-            document.body.classList.remove('white-theme');
-            document.body.classList.add('black-theme');
-            document.getElementById('themeToggle').innerHTML = '☀️ Light Mode';
-        } else {
-            document.body.classList.remove('black-theme');
-            document.body.classList.add('white-theme');
-            document.getElementById('themeToggle').innerHTML = '🌙 Dark Mode';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            document.getElementById('themeToggle').textContent = '☀️';
         }
     </script>
 </body>
